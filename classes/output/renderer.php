@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language Strings for block_plp.
+ * This file holds the renderer class to be used in rendering all templates.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
@@ -24,9 +24,21 @@
  *
  */
 
-$string['pluginname'] = 'Personal Learning Plan';
+namespace block_plp\output;
 
-// Error messages.
-$string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
-$string['error:templates:invalid'] = 'Invalid template file';
-$string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
+use plugin_renderer_base;
+
+defined('MOODLE_INTERNAL') or die();
+
+/**
+ * Renderer class
+ *
+ * @package     block_plp
+ * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
+ * @link        https://github.com/cwarwicker/moodle-block_plp
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ */
+class renderer extends plugin_renderer_base {
+
+}

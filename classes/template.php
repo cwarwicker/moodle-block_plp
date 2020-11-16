@@ -70,6 +70,18 @@ abstract class template {
     protected $renderer;
 
     /**
+     * Page title to display.
+     * @var string
+     */
+    protected $pagetitle;
+
+    /**
+     * If specified, the template will try to load this mustache file instead of working out which one it should use.
+     * @var string
+     */
+    protected $specificmustachefile;
+
+    /**
      * Construct the template object.
      */
     public function __construct() {
@@ -177,6 +189,53 @@ abstract class template {
     }
 
     /**
+     * Get the page title we have set for this template and action.
+     * @return string|null
+     */
+    public function get_page_title() : ?string {
+        return $this->pagetitle;
+    }
+
+    /**
+     * Set the page title to use.
+     * @param string $title
+     * @return $this
+     */
+    public function set_page_title(string $title) {
+        $this->pagetitle = $title;
+        return $this;
+    }
+
+    /**
+     * Get the page title to display, either from one which has been set, or a default using the component and action.
+     * @return string
+     */
+    protected function get_default_page_title() : string {
+
+        $key = ($this->pagetitle) ?? 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_action();
+        return get_string($key, 'block_plp');
+
+    }
+
+    /**
+     * Get the specific mustache file we want to load.
+     * @return string
+     */
+    public function get_specific_mustache_file() : ?string {
+        return $this->specificmustachefile;
+    }
+
+    /**
+     * Set a specific mustache file to load, instead of working it out based on component and action.
+     * @param string $file Path to the mustache file. E.g. "block_plp/myfile"
+     * @return $this
+     */
+    public function set_specific_mustache_file(string $file) {
+        $this->specificmustachefile = $file;
+        return $this;
+    }
+
+    /**
      * Call the action's method.
      * @return bool The result of calling the method. If return is not TRUE, will be assumed something went wrong.
      */
@@ -189,6 +248,30 @@ abstract class template {
     }
 
     /**
+     * Get the component from the namespace.
+     *
+     * For example, if the namespace is: block_plp\core\templates\config_template then the component is "core".
+     * @return string|string[]
+     * @throws \ReflectionException
+     */
+    protected function get_component() : string {
+        $reflect = new \ReflectionClass($this);
+        return str_replace(['block_plp\\', '\\templates'], '', $reflect->getNamespaceName());
+    }
+
+    /**
+     * Get the component name from the namespace.
+     *
+     * For example, if the namespace is block_plp\core\templates\config_template then the component name is: "config".
+     * @return string
+     * @throws \ReflectionException
+     */
+    protected function get_component_name() : string {
+        $reflect = new \ReflectionClass($this);
+        return str_replace('_template', '', $reflect->getShortName());
+    }
+
+    /**
      * Work out which mustache file needs loading by the renderer, based on this class name and the action.
      * @return array Array of possible template files to try.
      */
@@ -196,20 +279,22 @@ abstract class template {
 
         $files = array();
 
-        $reflect = new \ReflectionClass($this);
-
-        // TODO: Specify a different file.
+        // If we specified a file to load, use that instead.
+        if ($this->get_specific_mustache_file() !== null) {
+            $files[] = $this->get_specific_mustache_file();
+            return $files;
+        }
 
         // Mustache files must be within the top level plugin directory 'templates'. These will be broken down into
         // sub-directories based on their components. E.g. templates/core/config, templates/plugins/attendance/
         // Therefore we need to work out the path in the templates directory, based on this class and action.
-        $component = str_replace(['block_plp\\', '\\templates'], '', $reflect->getNamespaceName());
-        $name = str_replace('_template', '', $reflect->getShortName());
+        $component = $this->get_component();
+        $name = $this->get_component_name();
 
-        // First try using the action template.
+        // First try using the action template. E.g. "/templates/core/config/action.mustache".
         $files[] = 'block_plp/' . $component . '/' . $name . '/' . $this->get_action();
 
-        // If that doesn't exist, try looking for an 'index' one in the component.
+        // If that doesn't exist, try looking for an 'index' one. E.g. "/templates/core/config/index.mustache".
         $files[] = 'block_plp/' . $component . '/' . $name . '/index';
 
         return $files;
@@ -226,15 +311,17 @@ abstract class template {
 
         // Start by setting up the Moodle page.
         $PAGE->set_url(new moodle_url($_SERVER['REQUEST_URI']));
-        // TODO: Set title in template: $PAGE->set_title( '' ); .
+        $PAGE->set_title( $this->get_default_page_title() );
         $PAGE->set_cacheable(true);
 
         echo $OUTPUT->header();
 
-        // Work out which mustache files to try loading and see if any of them can be loaded.
+        // There may not be a mustache file for the action we ran, in which case we will want to fall back to a default.
+        // So, we need to work out which mustache files to try loading and see if any of them can be loaded.
         $files = $this->get_possible_template_files();
         foreach ($files as $index => $file) {
             try {
+                // If we can successfully load this musctache file, then break out of the loop and don't try the others.
                 echo $this->get_renderer()->render_from_template($file, $this->get_vars());
                 break;
             } catch (moodle_exception $ex) {

@@ -26,6 +26,8 @@
 
 namespace block_plp;
 
+use coding_exception;
+
 defined('MOODLE_INTERNAL') or die();
 
 /**
@@ -88,25 +90,46 @@ abstract class controller {
     }
 
     /**
+     * Get the component from the namespace.
+     *
+     * For example, if the namespace is: block_plp\core\controllers\config_controller then the component is "core".
+     * @return string|string[]
+     * @throws \ReflectionException
+     */
+    protected function get_component() : string {
+        $reflect = new \ReflectionClass($this);
+        return str_replace('\\controllers', '\\templates', $reflect->getNamespaceName());
+    }
+
+    /**
+     * Get the component name from the namespace.
+     *
+     * For example, if the namespace is block_plp\core\controllers\config_controller then the component name is: "config".
+     * @return string
+     * @throws \ReflectionException
+     */
+    protected function get_component_name() : string {
+        $reflect = new \ReflectionClass($this);
+        return str_replace('_controller', '_template', $reflect->getShortName());
+    }
+
+    /**
      * Set the default template object to be used, unless overridden by set_template().
      * @throws \coding_exception
      * @return void
      */
     protected function set_default_template() {
 
-        $reflect = new \ReflectionClass($this);
-
         // By default, the template we are wanting to use is likely in the same directory as the controller, but
         // inside the /templates/ sub directory and namespace. So we can work out its path from the controllers path.
-        $namespace = str_replace('\\controllers', '\\templates', $reflect->getNamespaceName());
-        $name = str_replace('_controller', '_template', $reflect->getShortName());
+        $namespace = $this->get_component();
+        $name = $this->get_component_name();
 
         $class = $namespace . '\\' . $name;
 
         // All controllers should have a matching template, even if it's just a blank shell.
         if (!class_exists($class)) {
-            // TODO: better message.
-            throw new \coding_exception('invalidtplclass: ' . $class);
+            throw new coding_exception(get_string('error:class', 'block_plp', $class));
         }
 
         $template = new $class();
@@ -229,9 +252,9 @@ abstract class controller {
 
         }
 
+        // Make sure that the template we have loaded in is actually a valid template class.
         if (!$this->get_template() instanceof template) {
-            // TODO: nice message.
-            print_error('invalid template');
+            print_error('error:template:invalid', 'block_plp');
         }
 
     }
@@ -248,14 +271,12 @@ abstract class controller {
 
         // If we haven't exited the process so far, checks must have passed. So now call the action.
         if ($this->call_action() !== true ) {
-            // TODO: Nicer error message.
-            print_error('Something went wrong');
+            print_error('error:unknown', 'block_plp');
         }
 
         // Now call the action on the template to load the correct display.
         if ($this->get_template()->call_action() !== true) {
-            // TODO: Nicer error message.
-            print_error('Something else went wrong');
+            print_error('error:unknown', 'block_plp');
         };
 
         // Assuming everything went okay up to this point, we can now render the template.

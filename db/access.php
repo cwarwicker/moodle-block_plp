@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file holds the renderer class to be used in rendering all templates.
+ * Capbilities for block_plp.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
@@ -26,15 +26,29 @@
 
 defined('MOODLE_INTERNAL') or die();
 
-/**
- * Renderer class
- *
- * @package     block_plp
- * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
- * @link        https://github.com/cwarwicker/moodle-block_plp
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- */
-class block_plp_renderer extends plugin_renderer_base {
+$capabilities = array(
 
-}
+    'block/plp:addinstance' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array(
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    'block/plp:view' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array(
+            'user' => CAP_PREVENT,
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+);
