@@ -43,9 +43,7 @@ use context_user;
  */
 class user extends model {
 
-    /**
-     * Use the permissions trait in this class.
-     */
+    // Use the permissions trait in this class.
     use permissions;
 
     /**
@@ -100,14 +98,15 @@ class user extends model {
                                               WHERE x.contextlevel = :contextlevel
                                               AND ra.userid = :userid
                                               AND r.shortname = :role
-                                              ORDER BY c.shortname ASC", ['contextlevel' => CONTEXT_COURSE, 'userid' => $this->get('id'), 'role' => $role]);
+                                              ORDER BY c.shortname ASC",
+            ['contextlevel' => CONTEXT_COURSE, 'userid' => $this->get('id'), 'role' => $role]);
 
         return $courses;
 
     }
 
     /**
-     * Get all of the permissions contexts we will need to check, when checking permissions on anything related to the specified user.
+     * Get all of the permissions contexts we need, when checking permissions on anything related to the specified user.
      * @param int $userid ID of the Moodle user whose we are trying to do something with.
      * @return array Array of contexts
      */
@@ -133,7 +132,7 @@ class user extends model {
         }
 
         // Course Teacher - Teachers will have the 'view' capability on a course, so we check it on course contexts.
-        // So to do this, we find every course the specified user is on, then check if this user is also on them and has the capability there.
+        // So we find every course the specified user is on which this user is also on, then check the capability there.
         $studentcourses = $student->get_courses('student'); // TODO: Get the roles from a setting.
         foreach ($studentcourses as $course) {
             // Does our current user have the view capability on this course context?
@@ -149,7 +148,7 @@ class user extends model {
             $contexts[] = $context;
         }
 
-        // PLP Admin/Manager - PLP Managers will be assigned with the specific 'view_any' capability and should be assigned at the system level.
+        // PLP Manager - Should be assigned with the specific 'view_any' capability and should be at the system level.
         $context = context_system::instance();
         if (has_capability($capabilities['manager'], $context, $this->get('id'))) {
             $contexts[] = $context;

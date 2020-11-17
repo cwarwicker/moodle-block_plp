@@ -212,7 +212,8 @@ abstract class template {
      */
     protected function get_default_page_title() : string {
 
-        $key = ($this->pagetitle) ?? 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_action();
+        $default = 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_action();
+        $key = ($this->pagetitle) ?? $default;
         return get_string($key, 'block_plp');
 
     }
