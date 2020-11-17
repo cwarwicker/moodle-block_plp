@@ -39,6 +39,7 @@ $capabilities = array(
         )
     ),
 
+    // General capability used to check if a user can access another's PLP.
     'block/plp:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_BLOCK,
@@ -50,5 +51,18 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+
+    // Used to check if a user can view any PLP in the system.
+    'block/plp:view_any' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array(
+            'user' => CAP_PREVENT,
+            'student' => CAP_PREVENT,
+            'teacher' => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager' => CAP_ALLOW
+        )
+    )
 
 );

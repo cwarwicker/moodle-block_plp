@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') or die();
 
-$plugin->version = 2020110301;
+$plugin->version = 2020110305;
 $plugin->requires = 2020102300;
 $plugin->component = 'block_plp';
 $plugin->dependencies = [];

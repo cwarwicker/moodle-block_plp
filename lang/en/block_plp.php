@@ -30,3 +30,8 @@ $string['pluginname'] = 'Personal Learning Plan';
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
 $string['error:templates:invalid'] = 'Invalid template file';
 $string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
+
+// Capabilities.
+$string['block/plp:addinstance'] = 'Add an instance of the block';
+$string['block/plp:view'] = 'View a user\'s PLP';
+$string['block/plp:view_any'] = 'View any user\'s PLP';
