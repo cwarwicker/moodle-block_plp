@@ -63,6 +63,13 @@ $capabilities = array(
             'editingteacher' => CAP_PREVENT,
             'manager' => CAP_ALLOW
         )
+    ),
+
+    // Used to check if a user can change PLP config settings. This should only be admins by default, so no archetypes selected.
+    'block/plp:configure' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array()
     )
 
 );

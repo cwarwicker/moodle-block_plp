@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version Information.
+ * This file contains the config.php page, which is used for editing/viewing all configuration settings in the plugin.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
@@ -24,11 +24,17 @@
  *
  */
 
-defined('MOODLE_INTERNAL') or die();
+use block_plp\controller;
+use block_plp\core\controllers\config_controller;
 
-$plugin->version = 2020110307;
-$plugin->release = '0.0.1';
-$plugin->requires = 2020102300;
-$plugin->component = 'block_plp';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [];
+require_once('../../config.php');
+
+// No require_login() here as it is handled by the controller.
+
+// Which page are we trying to view?
+$page = optional_param('page', 'overview', PARAM_TEXT);
+
+// Load the config controller.
+config_controller::load($page, [
+    controller::OPTION_REQUIRE_CAPABILITIES => ['block/plp:configure' => context_system::instance()]
+])->run();

@@ -226,7 +226,8 @@ abstract class controller {
         if ($this->has_action()) {
             return call_user_func([$this, 'call_' . $this->get_action()], $this->get_data());
         } else {
-            return false;
+            // We return true, as it's not necessarily a failure, the controller may simply not need a method for this action.
+            return true;
         }
     }
 

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version Information.
+ * This file holds the config_controller class. For handling everything related to the config.php page.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
@@ -24,11 +24,21 @@
  *
  */
 
+namespace block_plp\core\controllers;
+
+use block_plp\controller as base_controller;
+
 defined('MOODLE_INTERNAL') or die();
 
-$plugin->version = 2020110307;
-$plugin->release = '0.0.1';
-$plugin->requires = 2020102300;
-$plugin->component = 'block_plp';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [];
+/**
+ * This is the config controller class.
+ *
+ * @package     block_plp
+ * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
+ * @link        https://github.com/cwarwicker/moodle-block_plp
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ */
+class config_controller extends base_controller {
+
+}

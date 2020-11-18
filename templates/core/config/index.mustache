@@ -1,0 +1,69 @@
+{{> block_plp/core/config/_header}}
+
+<div class="block_plp-full_page">
+
+    <div class='block_plp-side_panel'>
+        <div class='block_plp-panel_heading'>{{#str}}recentactivity, block_plp{{/str}}</div>
+        <div class="block_plp-panel_body">
+            <ul class='block_plp-recent_activity'>
+                <li>TODO</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class='block_plp-centre_panel'>
+        <div class='block_plp-panel_heading'>{{#str}}systeminfo, block_plp{{/str}}</div>
+        <div class="block_plp-panel_body">
+
+            <table class="block_plp-sys_info">
+
+                <tr>
+                    <td><strong>{{#str}}system:moodleversion, block_plp{{/str}}</strong></td>
+                    <td>{{system_version}}</td>
+                </tr>
+
+                <tr>
+                    <td><strong>{{#str}}system:pluginversion, block_plp{{/str}}</strong></td>
+                    <td>{{plugin_version}}</td>
+                </tr>
+
+                <tr>
+                    <td><strong>{{#str}}system:updatesavailable, block_plp{{/str}}</strong></td>
+                    <td>TODO</td>
+                </tr>
+
+                <tr>
+                    <td><strong>{{#str}}system:plugindataroot, block_plp{{/str}}</strong></td>
+                    <td>
+                        <span>{{dataroot}}<br></span>
+                        <span class="badge badge-{{dataroot_writeable_badge}}">{{dataroot_writeable}}</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2"><hr></td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class='block_plp-side_panel'>
+
+        <div class='block_plp-panel_heading'>{{#str}}stats, block_plp{{/str}}</div>
+        <div class="block_plp-panel_body">
+            TODO
+        </div>
+
+        <div class='block_plp-panel_heading'>{{#str}}plugins, block_plp{{/str}}</div>
+        <div class="block_plp-panel_body">
+            TODO
+        </div>
+
+    </div>
+
+</div>
+
+{{> block_plp/core/config/_footer}}

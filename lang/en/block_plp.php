@@ -25,6 +25,8 @@
  */
 
 $string['pluginname'] = 'Personal Learning Plan';
+$string['pluginname:short'] = 'PLP';
+$string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
@@ -35,3 +37,33 @@ $string['error:unknown'] = 'Something went wrong. This is probably a coding prob
 $string['block/plp:addinstance'] = 'Add an instance of the block';
 $string['block/plp:view'] = 'View a user\'s PLP';
 $string['block/plp:view_any'] = 'View any user\'s PLP';
+
+// Page titles.
+$string['title:core:config:overview'] = 'Configuration - Overview';
+
+// General strings.
+$string['build'] = 'Build';
+
+$string['environment'] = 'Environment';
+
+$string['home'] = 'Home';
+
+$string['mis'] = 'MIS';
+
+$string['plugins'] = 'Plugins';
+
+$string['notwriteable'] = 'Not Writeable';
+
+$string['overview'] = 'Overview';
+
+$string['recentactivity'] = 'Recent Activity';
+
+$string['settings'] = 'Settings';
+$string['stats'] = 'Stats';
+$string['systeminfo'] = 'System Information';
+$string['system:moodleversion'] = 'Moodle Version';
+$string['system:pluginversion'] = 'Plugin Version';
+$string['system:updatesavailable'] = 'Update(s) Available';
+$string['system:plugindataroot'] = 'Plugin Data Directory';
+
+$string['writeable'] = 'Writeable';

@@ -49,7 +49,7 @@ abstract class template {
      * Array of named variables we will be passing into the template.
      * @var array
      */
-    protected $vars;
+    protected $vars = [];
 
     /**
      * The method we are calling on the template.
@@ -214,7 +214,7 @@ abstract class template {
 
         $default = 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_action();
         $key = ($this->pagetitle) ?? $default;
-        return get_string($key, 'block_plp');
+        return get_string('pluginname', 'block_plp') . ' - ' . get_string($key, 'block_plp');
 
     }
 
@@ -314,6 +314,7 @@ abstract class template {
         $PAGE->set_url(new moodle_url($_SERVER['REQUEST_URI']));
         $PAGE->set_title( $this->get_default_page_title() );
         $PAGE->set_cacheable(true);
+        $PAGE->set_pagelayout('login'); // TODO: Get from setting.
 
         echo $OUTPUT->header();
 
