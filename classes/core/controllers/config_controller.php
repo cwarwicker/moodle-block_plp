@@ -27,6 +27,9 @@
 namespace block_plp\core\controllers;
 
 use block_plp\controller as base_controller;
+use block_plp\core\forms\settings_form;
+use block_plp\plp;
+use core\notification;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -40,5 +43,43 @@ defined('MOODLE_INTERNAL') or die();
  *
  */
 class config_controller extends base_controller {
+
+    /**
+     * Controller action to run on the settings config page.
+     * @return bool
+     */
+    public function call_settings() {
+
+        $form = new settings_form();
+
+        // If the form is submitted.
+        if ($data = $form->get_data()) {
+
+            $plp = new plp();
+
+            // Update settings.
+            $plp->update_setting('layout', $data->layout);
+            $plp->update_setting('dock', $data->dock);
+            $plp->update_setting('logo', $data->logo);
+            $plp->update_setting('category_usage', $data->category_usage);
+            $plp->update_setting('categories', $data->categories);
+            $plp->update_setting('academic_year_enabled', $data->academic_year_enabled);
+            $plp->update_setting('academic_year', $data->academic_year);
+            $plp->update_setting('email_alerts_enabled', $data->email_alerts_enabled);
+            $plp->update_setting('role_student', $data->role_student);
+            $plp->update_setting('role_teacher', $data->role_teacher);
+            $plp->update_setting('role_tutor', $data->role_tutor);
+            $plp->update_setting('role_manager', $data->role_manager);
+
+            notification::success(get_string('configsaved', 'block_plp'));
+
+        }
+
+        // Pass the form object through to the template for rendering.
+        $this->get_template()->set_form($form);
+
+        return true;
+
+    }
 
 }
