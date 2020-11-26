@@ -67,6 +67,12 @@ class plp {
     ];
 
     /**
+     * Array of PLP roles and their Moodle role IDs.
+     * @var array
+     */
+    protected $roles = [];
+
+    /**
      * Construct plp object.
      */
     public function __construct() {
@@ -195,6 +201,48 @@ class plp {
             $obj['value'] = $value;
             return $DB->insert_record('block_plp_settings', $obj);
         }
+
+    }
+
+    /**
+     * Get the role IDs configured for a particular named role within the PLP.
+     * @param string $name E.g. 'tutor', 'student', 'teacher', or 'manager'.
+     * @return mixed
+     */
+    public function get_roles(string $name) {
+
+        global $DB;
+
+        // Have we already loaded this?
+        if (array_key_exists($name, $this->roles)) {
+            return $this->roles[$name];
+        }
+
+        $setting = $this->get_setting('role_' . $name);
+        if (is_null($setting)) {
+            return null;
+        }
+
+        // Explode it by comma, in case they chose more than 1 role for this.
+        $setting =  explode(',', $setting);
+
+        // Make sure the roles are still valid and haven't been deleted from the system.
+        $roles = array_filter($setting, function($id) use ($DB) {
+            return $DB->get_record('role', ['id' => $id]);
+        });
+
+        // However, if it's only 1 element, we can just return that.
+        if (count($roles) == 1) {
+            $roles = $roles[0];
+        }
+
+        // If at this point we have nothing, set it to null, rather than an empty array.
+        if (empty($roles)) {
+            $roles = null;
+        }
+
+        $this->roles[$name] = $roles;
+        return $this->roles[$name];
 
     }
 

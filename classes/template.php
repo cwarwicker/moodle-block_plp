@@ -310,11 +310,13 @@ abstract class template {
 
         global $OUTPUT, $PAGE;
 
+        $plp = new plp();
+
         // Start by setting up the Moodle page.
         $PAGE->set_url(new moodle_url($_SERVER['REQUEST_URI']));
         $PAGE->set_title( $this->get_default_page_title() );
         $PAGE->set_cacheable(true);
-        $PAGE->set_pagelayout('login'); // TODO: Get from setting.
+        $PAGE->set_pagelayout($plp->get_setting('layout'));
 
         echo $OUTPUT->header();
 

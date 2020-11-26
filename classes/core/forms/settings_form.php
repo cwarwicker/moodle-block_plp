@@ -123,9 +123,8 @@ class settings_form extends moodleform {
         $this->_form->addElement('select', 'role_teacher', get_string('settings:role:teacher:info', 'block_plp'), $roles)
             ->setMultiple(true);
 
-        // Tutor role(s).
-        $this->_form->addElement('select', 'role_tutor', get_string('settings:role:tutor:info', 'block_plp'), $roles)
-            ->setMultiple(true);
+        // Tutor role - Only one, as we need to use this when doing role_assign.
+        $this->_form->addElement('select', 'role_tutor', get_string('settings:role:tutor:info', 'block_plp'), [''] + $roles);
 
         // PLP Manager role(s).
         $this->_form->addElement('select', 'role_manager', get_string('settings:role:manager:info', 'block_plp'), $roles)

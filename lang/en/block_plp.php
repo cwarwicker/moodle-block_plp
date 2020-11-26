@@ -30,13 +30,15 @@ $string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
+$string['error:role:create'] = 'Something went wrong creating the {$a} role.';
 $string['error:templates:invalid'] = 'Invalid template file';
 $string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
 
 // Capabilities.
-$string['block/plp:addinstance'] = 'Add an instance of the block';
-$string['block/plp:view'] = 'View a user\'s PLP';
-$string['block/plp:view_any'] = 'View any user\'s PLP';
+$string['plp:addinstance'] = 'Add an instance of the block';
+$string['plp:configure'] = 'Configure the settings of the PLP block';
+$string['plp:view'] = 'View a user\'s PLP';
+$string['plp:view_any'] = 'View any user\'s PLP';
 
 // Page titles.
 $string['title:core:config:overview'] = 'Configuration - Overview';
@@ -48,6 +50,7 @@ $string['build'] = 'Build';
 
 $string['config'] = 'Configuration';
 $string['configsaved'] = 'Configuration settings saved';
+$string['creatednewrole'] = 'Created new Moodle role [%d] %s (%s) - %s';
 
 $string['environment'] = 'Environment';
 
@@ -59,6 +62,10 @@ $string['left'] = 'Left';
 
 $string['mis'] = 'MIS';
 
+$string['personaltutor'] = 'Personal Tutor';
+$string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';
+$string['plpmanager'] = 'PLP Manager';
+$string['plpmanager:role:desc'] = 'This role should be used to define users with the permissions to see the PLP data of every student in the system. This role should be given the capability block/plp:view_any and all PLP Managers should be added to this role on the system context.';
 $string['plugins'] = 'Plugins';
 
 $string['notwriteable'] = 'Not Writeable';
@@ -93,7 +100,7 @@ $string['settings:role:student:info'] = $string['settings:role:student'] . '<br>
 $string['settings:role:teacher'] = '<strong>Teacher Role</strong>';
 $string['settings:role:teacher:info'] = $string['settings:role:teacher'] . '<br>Which role(s) in your system do you use to define a "teacher" on a course?';
 $string['settings:role:tutor'] = '<strong>Personal Tutor Role</strong>';
-$string['settings:role:tutor:info'] = $string['settings:role:tutor'] . '<br>Which role(s) in your system do you wish to use for Personal Tutor assignments?';
+$string['settings:role:tutor:info'] = $string['settings:role:tutor'] . '<br>Which role in your system do you wish to use for Personal Tutor assignments?';
 
 
 
