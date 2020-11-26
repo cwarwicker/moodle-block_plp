@@ -30,6 +30,8 @@ $string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
+$string['error:mis:connection'] = 'Unable to connect to external database.';
+$string['error:mis:type'] = 'Database type ({$a}) is not supported.';
 $string['error:role:create'] = 'Something went wrong creating the {$a} role.';
 $string['error:templates:invalid'] = 'Invalid template file';
 $string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
@@ -42,6 +44,7 @@ $string['plp:view_any'] = 'View any user\'s PLP';
 
 // Page titles.
 $string['title:core:config:overview'] = 'Configuration - Overview';
+$string['title:core:config:mis'] = 'Configuration - MIS Connections';
 $string['title:core:config:settings'] = 'Configuration - General Settings';
 
 // General strings.
@@ -61,6 +64,7 @@ $string['home'] = 'Home';
 $string['left'] = 'Left';
 
 $string['mis'] = 'MIS';
+$string['mis:long'] = 'Management Information System(s) - Connections';
 
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';

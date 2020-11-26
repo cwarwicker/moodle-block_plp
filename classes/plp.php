@@ -224,7 +224,7 @@ class plp {
         }
 
         // Explode it by comma, in case they chose more than 1 role for this.
-        $setting =  explode(',', $setting);
+        $setting = explode(',', $setting);
 
         // Make sure the roles are still valid and haven't been deleted from the system.
         $roles = array_filter($setting, function($id) use ($DB) {

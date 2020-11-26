@@ -34,8 +34,8 @@ $plp = new \block_plp\plp();
 // If they have already chosen a role for these, then it will be skipped.
 
 // Personal Tutor role.
-$personal_tutor_role = $plp->get_roles('tutor');
-if (is_null($personal_tutor_role)) {
+$personaltutorrole = $plp->get_roles('tutor');
+if (is_null($personaltutorrole)) {
 
     $role = new stdClass();
     $role->name = get_string('personaltutor', 'block_plp');
@@ -57,7 +57,7 @@ if (is_null($personal_tutor_role)) {
         // Update the config setting.
         $plp->update_setting('role_tutor', $role->id);
 
-        // Print success message
+        // Print success message.
         mtrace(sprintf(get_string('creatednewrole', 'block_plp'), $role->id, $role->name, $role->shortname, $role->desc));
 
     } else {
@@ -70,8 +70,8 @@ if (is_null($personal_tutor_role)) {
 }
 
 // PLP Manager role.
-$manager_role = $plp->get_roles('manager');
-if (is_null($manager_role)) {
+$managerrole = $plp->get_roles('manager');
+if (is_null($managerrole)) {
 
     $role = new stdClass();
     $role->name = get_string('plpmanager', 'block_plp');
@@ -92,7 +92,7 @@ if (is_null($manager_role)) {
         // Update the config setting.
         $plp->update_setting('role_manager', $role->id);
 
-        // Print success message
+        // Print success message.
         mtrace(sprintf(get_string('creatednewrole', 'block_plp'), $role->id, $role->name, $role->shortname, $role->desc));
 
     } else {
