@@ -31,7 +31,7 @@ use block_plp\models\user;
 defined('MOODLE_INTERNAL') or die();
 
 /**
- * This interface can be implemented on any class which can be used to check user permissions of an instance.
+ * This trait can be added to a class which and then used to check user permissions of an instance.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
