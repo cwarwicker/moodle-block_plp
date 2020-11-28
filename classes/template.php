@@ -30,6 +30,7 @@ use context;
 use context_system;
 use moodle_exception;
 use moodle_url;
+use ReflectionClass;
 use renderer_base;
 
 defined('MOODLE_INTERNAL') or die();
@@ -50,6 +51,12 @@ abstract class template {
      * @var array
      */
     protected $vars = [];
+
+    /**
+     * The page we are loading through the template
+     * @var string
+     */
+    protected $page;
 
     /**
      * The method we are calling on the template.
@@ -106,6 +113,15 @@ abstract class template {
     }
 
     /**
+     * Try and get a specific variable that has been loaded into the template.
+     * @param string $key
+     * @return mixed|null
+     */
+    public function get_var(string $key) {
+        return (array_key_exists($key, $this->vars)) ? $this->vars[$key] : null;
+    }
+
+    /**
      * Set the array of variables to pass into the template.
      * @param array $vars
      * @return $this
@@ -128,32 +144,58 @@ abstract class template {
 
     /**
      * Get the named action we are performing.
-     * @return string
+     * @return string|null
      */
-    public function get_action() : string {
+    public function get_action() : ?string {
         return $this->action;
     }
 
     /**
      * Set the action we are going to perform.
-     * @param string $action
+     * @param string|null $action
      * @return $this
      */
-    public function set_action(string $action) {
+    public function set_action(?string $action) {
         $this->action = $action;
         return $this;
     }
 
     /**
-     * Check if this template actually has the specified action as a method.
-     * @return bool
+     * Get the page we are wanting to load.
+     * @return string
      */
-    protected function has_action() : bool {
-        return method_exists($this, 'call_' . $this->get_action());
+    public function get_page() : string {
+        return $this->page;
     }
 
     /**
-     * Get the context of the page.
+     * Set the page we are wanting to load.
+     * @param string $page
+     * @return $this
+     */
+    public function set_page(string $page) {
+        $this->page = $page;
+        return $this;
+    }
+
+    /**
+     * Check if this template actually has the specified page.
+     * @return bool
+     */
+    protected function has_page() : bool {
+        return method_exists($this, 'page_' . $this->get_page());
+    }
+
+    /**
+     * Check if this template actually has the specified action.
+     * @return bool
+     */
+    protected function has_action() : bool {
+        return method_exists($this, 'action_' . $this->get_page() . '_' . $this->get_action());
+    }
+
+    /**
+     * Get the context of the $PAGE.
      * @return context
      */
     public function get_context() : context {
@@ -212,7 +254,10 @@ abstract class template {
      */
     protected function get_default_page_title() : string {
 
-        $default = 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_action();
+        $default = 'title:' . $this->get_component() . ':' . $this->get_component_name() . ':' . $this->get_page();
+        if (!is_null($this->get_action())) {
+            $default .= ':' . $this->get_action();
+        }
         $key = ($this->pagetitle) ?? $default;
         return get_string('pluginname', 'block_plp') . ' - ' . get_string($key, 'block_plp');
 
@@ -237,15 +282,25 @@ abstract class template {
     }
 
     /**
-     * Call the action's method.
+     * Call the template's page/action method.
      * @return bool The result of calling the method. If return is not TRUE, will be assumed something went wrong.
      */
-    public function call_action() : bool {
-        if ($this->has_action()) {
-            return call_user_func([$this, 'call_' . $this->get_action()]);
+    public function call_page_action() : bool {
+
+        if ($this->has_page()) {
+
+            if ($this->has_action()) {
+                // Are we running a specific action? If so, call that.
+                return call_user_func([$this, 'action_' . $this->get_page() . '_' . $this->get_action()]);
+            } else {
+                // If not, just call the page loading method.
+                return call_user_func([$this, 'page_' . $this->get_page()]);
+            }
+
         } else {
             return false;
         }
+
     }
 
     /**
@@ -256,7 +311,7 @@ abstract class template {
      * @throws \ReflectionException
      */
     protected function get_component() : string {
-        $reflect = new \ReflectionClass($this);
+        $reflect = new ReflectionClass($this);
         return str_replace(['block_plp\\', '\\templates'], '', $reflect->getNamespaceName());
     }
 
@@ -268,7 +323,7 @@ abstract class template {
      * @throws \ReflectionException
      */
     protected function get_component_name() : string {
-        $reflect = new \ReflectionClass($this);
+        $reflect = new ReflectionClass($this);
         return str_replace('_template', '', $reflect->getShortName());
     }
 
@@ -292,8 +347,13 @@ abstract class template {
         $component = $this->get_component();
         $name = $this->get_component_name();
 
-        // First try using the action template. E.g. "/templates/core/config/action.mustache".
-        $files[] = 'block_plp/' . $component . '/' . $name . '/' . $this->get_action();
+        // If we have an action, try that first.
+        if (!is_null($this->get_action())) {
+            $files[] = 'block_plp/' . $component . '/' . $name . '/' . $this->get_page() . '_' . $this->get_action();
+        }
+
+        // First try using the page we are trying to load. E.g. "/templates/core/config/page.mustache".
+        $files[] = 'block_plp/' . $component . '/' . $name . '/' . $this->get_page();
 
         // If that doesn't exist, try looking for an 'index' one. E.g. "/templates/core/config/index.mustache".
         $files[] = 'block_plp/' . $component . '/' . $name . '/index';
@@ -338,25 +398,6 @@ abstract class template {
         }
 
         echo $OUTPUT->footer();
-
-    }
-
-    /**
-     * Instantiate a template object.
-     * @param string $action The action we are performing
-     * @param array|null $options Array of controller options to apply before running anything
-     * @param array|null $data Array of extra data to pass through with the action
-     * @return controller
-     */
-    public static function load(string $action, array $options = null, array $data = null) : controller {
-
-        // Get the class this method was actually called from, as this class is abstract so we can't use self.
-        $class = get_called_class();
-
-        // Instantiate instance of this class and set action and other params.
-        $controller = new $class();
-        $controller->set_action($action)->set_options($options)->set_data($data);
-        return $controller;
 
     }
 

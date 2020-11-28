@@ -33,8 +33,9 @@ require_once('../../config.php');
 
 // Which page are we trying to view?
 $page = optional_param('page', 'overview', PARAM_TEXT);
+$action = optional_param('action', null, PARAM_TEXT);
 
 // Load the config controller.
-config_controller::load($page, [
+config_controller::load($page, $action, [
     controller::OPTION_REQUIRE_CAPABILITIES => ['block/plp:configure' => context_system::instance()]
 ])->run();

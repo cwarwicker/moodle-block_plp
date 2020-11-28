@@ -30,6 +30,7 @@ $string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
+$string['error:invalidclassproperty'] = 'Property ({$a}) does not exist on this class.';
 $string['error:mis:connection'] = 'Unable to connect to external database.';
 $string['error:mis:type'] = 'Database type ({$a}) is not supported.';
 $string['error:role:create'] = 'Something went wrong creating the {$a} role.';
@@ -45,6 +46,7 @@ $string['plp:view_any'] = 'View any user\'s PLP';
 // Page titles.
 $string['title:core:config:overview'] = 'Configuration - Overview';
 $string['title:core:config:mis'] = 'Configuration - MIS Connections';
+$string['title:core:config:mis:edit'] = 'Configuration - MIS Connections - Edit';
 $string['title:core:config:settings'] = 'Configuration - General Settings';
 
 // General strings.
@@ -53,8 +55,12 @@ $string['build'] = 'Build';
 
 $string['config'] = 'Configuration';
 $string['configsaved'] = 'Configuration settings saved';
+$string['connections'] = 'Connections';
 $string['creatednewrole'] = 'Created new Moodle role [%d] %s (%s) - %s';
 
+$string['disabled'] = 'Disabled';
+
+$string['enabled'] = 'Enabled';
 $string['environment'] = 'Environment';
 
 $string['generalsettings'] = 'General Settings';
@@ -64,7 +70,10 @@ $string['home'] = 'Home';
 $string['left'] = 'Left';
 
 $string['mis'] = 'MIS';
+$string['mis:database'] = 'Database Name';
+$string['mis:host'] = 'Host';
 $string['mis:long'] = 'Management Information System(s) - Connections';
+$string['mis:newconnection'] = 'Create new connection';
 
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';
@@ -114,5 +123,7 @@ $string['system:moodleversion'] = 'Moodle Version';
 $string['system:pluginversion'] = 'Plugin Version';
 $string['system:updatesavailable'] = 'Update(s) Available';
 $string['system:plugindataroot'] = 'Plugin Data Directory';
+
+$string['type'] = 'Type';
 
 $string['writeable'] = 'Writeable';

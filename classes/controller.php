@@ -27,6 +27,7 @@
 namespace block_plp;
 
 use coding_exception;
+use ReflectionClass;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -54,6 +55,12 @@ abstract class controller {
     protected $template;
 
     /**
+     * The page we are loading through the controller.
+     * @var string
+     */
+    protected $page;
+
+    /**
      * The method we are calling on the controller.
      * @var string
      */
@@ -73,13 +80,16 @@ abstract class controller {
 
     /**
      * Construct controller object.
-     * @param string $action The action we want the controller to perform.
+     * @param string $page The page we want the controller to load.
+     * @param string $action The action to load on the page
      * @param array|null $options Array of controller options to check before running the action.
      * @param array|null $data Array of extra data to be used in the action.
+     * @throws coding_exception
      */
-    public function __construct(string $action, array $options = null, array $data = null) {
+    public function __construct(string $page, string $action = null, array $options = null, array $data = null) {
 
-        // Load the action, controller options and action data into the object.
+        // Load the page, action, controller options and data into the object.
+        $this->set_page($page);
         $this->set_action($action);
         $this->set_options($options);
         $this->set_data($data);
@@ -97,7 +107,7 @@ abstract class controller {
      * @throws \ReflectionException
      */
     protected function get_component() : string {
-        $reflect = new \ReflectionClass($this);
+        $reflect = new ReflectionClass($this);
         return str_replace('\\controllers', '\\templates', $reflect->getNamespaceName());
     }
 
@@ -109,7 +119,7 @@ abstract class controller {
      * @throws \ReflectionException
      */
     protected function get_component_name() : string {
-        $reflect = new \ReflectionClass($this);
+        $reflect = new ReflectionClass($this);
         return str_replace('_controller', '_template', $reflect->getShortName());
     }
 
@@ -133,6 +143,7 @@ abstract class controller {
         }
 
         $template = new $class();
+        $template->set_page($this->get_page());
         $template->set_action($this->get_action());
         $this->set_template($template);
 
@@ -158,19 +169,37 @@ abstract class controller {
 
     /**
      * Get the named action we are performing.
-     * @return string
+     * @return string|null
      */
-    public function get_action() : string {
+    public function get_action() : ?string {
         return $this->action;
     }
 
     /**
      * Set the action we are going to perform.
-     * @param string $action
+     * @param string|null $action
      * @return $this
      */
-    public function set_action(string $action) {
+    public function set_action(?string $action) {
         $this->action = $action;
+        return $this;
+    }
+
+    /**
+     * Get the page we are loading
+     * @return string
+     */
+    public function get_page() : string {
+        return $this->page;
+    }
+
+    /**
+     * Set the page we are loading.
+     * @param string $page
+     * @return $this
+     */
+    public function set_page(string $page) {
+        $this->page = $page;
         return $this;
     }
 
@@ -211,24 +240,41 @@ abstract class controller {
     }
 
     /**
-     * Check if this controller actually has the specified action as a method.
+     * Check if this controller actually has the specified page as a method.
      * @return bool
      */
-    protected function has_action() : bool {
-        return method_exists($this, 'call_' . $this->get_action());
+    protected function has_page() : bool {
+        return method_exists($this, 'page_' . $this->get_page());
     }
 
     /**
-     * Call the action's method.
+     * Check if this controller actually has the specified page as a method.
+     * @return bool
+     */
+    protected function has_action() : bool {
+        return method_exists($this, 'action_' . $this->get_page() . '_' . $this->get_action());
+    }
+
+    /**
+     * Load the controller's page/action method.
      * @return bool The result of calling the method. If return is not TRUE, will be assumed something went wrong.
      */
-    protected function call_action() : bool {
-        if ($this->has_action()) {
-            return call_user_func([$this, 'call_' . $this->get_action()], $this->get_data());
+    protected function call_page_action() : bool {
+
+        if ($this->has_page()) {
+
+            if ($this->has_action()) {
+                // Are we running a specific action? If so, call that.
+                return call_user_func([$this, 'action_' . $this->get_page() . '_' . $this->get_action()], $this->get_data());
+            } else {
+                // If not, just call the page loading method.
+                return call_user_func([$this, 'page_' . $this->get_page()], $this->get_data());
+            }
         } else {
-            // We return true, as it's not necessarily a failure, the controller may simply not need a method for this action.
+            // We return true, as it's not necessarily a failure, the controller may simply not need a method for this page.
             return true;
         }
+
     }
 
     /**
@@ -270,13 +316,13 @@ abstract class controller {
         // Before we run anything, go through the pre-run checks.
         $this->pre_run_checks();
 
-        // If we haven't exited the process so far, checks must have passed. So now call the action.
-        if ($this->call_action() !== true ) {
+        // If we haven't exited the process so far, checks must have passed. So now call the page load.
+        if ($this->call_page_action() !== true ) {
             print_error('error:unknown', 'block_plp');
         }
 
-        // Now call the action on the template to load the correct display.
-        if ($this->get_template()->call_action() !== true) {
+        // Now call the page load on the template to load the correct display.
+        if ($this->get_template()->call_page_action() !== true) {
             print_error('error:unknown', 'block_plp');
         };
 
@@ -287,18 +333,19 @@ abstract class controller {
 
     /**
      * Instantiate a controller object
-     * @param string $action The action we are performing
+     * @param string $page The page we are loading
+     * @param string|null $action The action to call on the page
      * @param array|null $options Array of controller options to apply before running anything
      * @param array|null $data Array of extra data to pass through with the action
      * @return controller
      */
-    public static function load(string $action, array $options = null, array $data = null) : controller {
+    public static function load(string $page, string $action = null, array $options = null, array $data = null) : controller {
 
         // Get the class this method was actually called from, as this class is abstract so we can't use self.
         $class = get_called_class();
 
-        // Instantiate instance of this class and set action and other params.
-        return new $class($action, $options, $data);
+        // Instantiate instance of this class and set page and other params.
+        return new $class($page, $action, $options, $data);
 
     }
 
