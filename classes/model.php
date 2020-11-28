@@ -26,6 +26,8 @@
 
 namespace block_plp;
 
+use block_plp\traits\orm;
+
 /**
  * Base model class for all models to extend.
  *
@@ -37,6 +39,9 @@ namespace block_plp;
  */
 abstract class model {
 
+    // Use the ORM trait.
+    use orm;
+
     /**
      * Name of the database table this object is loaded from.
      * @var string
@@ -44,29 +49,17 @@ abstract class model {
     protected static $table = '';
 
     /**
-     * Array of columns and values on the object.
-     * @var array
+     * Construct the model and try to load it from the database.
+     * @param int|null $id
      */
-    protected $columns = [];
+    public function __construct(int $id = null) {
 
-    /**
-     * Try to get one of the columns on this object.
-     * @param string $col The column key.
-     * @return mixed|null Either the value, or NULL is it doesn't exist.
-     */
-    public function get(string $col) {
-        return $this->columns[$col] ?? null;
-    }
+        // Load the record from the database.
+        if (!is_null($id)) {
+            $this->load_from_db($id);
+            $this->post_load_actions();
+        }
 
-    /**
-     * Set the value of a column on this object.
-     * @param string $col The column key.
-     * @param mixed $val The value to set.
-     * @return $this
-     */
-    public function set(string $col, $val) {
-        $this->columns[$col] = $val;
-        return $this;
     }
 
     /**
@@ -75,34 +68,6 @@ abstract class model {
      */
     protected function post_load_actions() {
         return;
-    }
-
-    /**
-     * Create an instance of this object based on a database record.
-     * @param int $id ID of the database row.
-     * @return model
-     * @throws \dml_exception
-     */
-    public static function load(int $id) {
-
-        global $DB;
-
-        // Try and get the record from the database.
-        $record = $DB->get_record(static::$table, ['id' => $id], '*', MUST_EXIST);
-
-        $class = get_called_class();
-        $object = new $class();
-
-        // Set all of the database row values into the object.
-        foreach ($record as $col => $val) {
-            $object->set($col, $val);
-        }
-
-        // Call any more specific actions the model requires after construction.
-        $object->post_load_actions();
-
-        return $object;
-
     }
 
 }

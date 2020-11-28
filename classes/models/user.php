@@ -67,7 +67,7 @@ class user extends model {
     /**
      * Return a user instance of whichever user is associated with this object instance.
      *
-     * This is overridden from the trait, as we don't want to store $this in a property on itself.
+     * This is overridden from the permissions trait, as we don't want to store $this in a property on itself.
      * @return user
      */
     public function get_user() : user {
