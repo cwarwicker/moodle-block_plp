@@ -114,7 +114,7 @@ class moodle {
         global $PAGE;
 
         $layouts = [];
-        foreach ($PAGE->theme->layouts as $layout => $info) {
+        foreach (array_keys($PAGE->theme->layouts) as $layout) {
             $layouts[$layout] = $layout;
         }
 

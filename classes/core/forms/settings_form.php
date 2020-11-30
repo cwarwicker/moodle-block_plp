@@ -54,7 +54,6 @@ class settings_form extends moodleform {
         $moodle = new moodle();
         $plp = new plp();
 
-        // Hidden elements.
         // Seems that Moodle doesn't keep the parameters in the querystring for the form action, so we'll need to set the page here.
         $this->_form->addElement('hidden', 'page');
         $this->_form->setType('page', PARAM_TEXT);
@@ -124,6 +123,7 @@ class settings_form extends moodleform {
             ->setMultiple(true);
 
         // Tutor role - Only one, as we need to use this when doing role_assign.
+        // Adding the empty array instead of using array_unshift here is okay, as $roles has no "0" key.
         $this->_form->addElement('select', 'role_tutor', get_string('settings:role:tutor:info', 'block_plp'), [''] + $roles);
 
         // PLP Manager role(s).

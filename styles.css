@@ -275,20 +275,26 @@ div.block_plp-panel_sub_heading {
     margin: auto;
     padding: 5px;
     color: #fff;
-    background-color: #CA6B42;
-    border: 1px solid #CA4242;
+    background-color: #ca6b42;
+    border: 1px solid #ca4242;
     border-top-right-radius: 3px;
     border-top-left-radius: 3px;
     font-size: 13px;
 }
 
-div.block_plp-panel_heading a, div.block_plp-panel_sub_heading a,
-div.block_plp-panel_heading a:visited, div.block_plp-panel_sub_heading a:visited,
-div.block_plp-panel_heading a:active, div.block_plp-panel_sub_heading a:active {
+div.block_plp-panel_heading a,
+div.block_plp-panel_sub_heading a,
+div.block_plp-panel_heading a:visited,
+div.block_plp-panel_sub_heading a:visited,
+div.block_plp-panel_heading a:active,
+div.block_plp-panel_sub_heading a:active {
     color: #fff;
 }
 
-a.block_plp-icon, a.block_plp-icon:hover, a.block_plp-icon:active, a.block_plp-icon:visited {
+a.block_plp-icon,
+a.block_plp-icon:hover,
+a.block_plp-icon:active,
+a.block_plp-icon:visited {
     text-decoration: none;
     box-shadow: none;
     outline: none;

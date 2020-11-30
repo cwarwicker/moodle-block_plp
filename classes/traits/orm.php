@@ -132,7 +132,7 @@ trait orm {
         // Get all the properties on the object to find out what keys will need inserting/updating.
         // Any which exist on the object but not in the database table will be ignored by Moodle's database API.
         $obj = new stdClass();
-        foreach (get_object_vars($this) as $key => $value) {
+        foreach (array_keys(get_object_vars($this)) as $key) {
             $obj->$key = $this->get($key);
         }
 
