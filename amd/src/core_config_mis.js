@@ -8,8 +8,6 @@ define(['jquery', 'core/str'], function($, str) {
 
         config.bind();
 
-        console.log('loaded config_mis src');
-
     };
 
     // Bind elements.

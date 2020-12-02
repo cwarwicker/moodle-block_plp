@@ -26,7 +26,6 @@
 
 namespace block_plp;
 
-use coding_exception;
 use context;
 use context_system;
 use moodle_exception;

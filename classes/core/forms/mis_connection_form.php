@@ -50,8 +50,6 @@ class mis_connection_form extends moodleform {
      */
     protected function definition() {
 
-        $connection = $this->_customdata;
-
         // Hidden elements.
         // Seems that Moodle doesn't keep the parameters in the querystring for the form action, so we'll need to set the page here.
         $this->_form->addElement('hidden', 'page');
