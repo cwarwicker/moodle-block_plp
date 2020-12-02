@@ -27,6 +27,7 @@
 namespace block_plp\models;
 
 use block_plp\model;
+use block_plp\plp;
 use block_plp\traits\permissions;
 use context_course;
 use context_system;
@@ -53,6 +54,12 @@ class user extends model {
     protected static $table = 'user';
 
     /**
+     * User's username
+     * @var string
+     */
+    protected $username;
+
+    /**
      * Array of courses this user is enrolled on.
      * @var array
      */
@@ -76,32 +83,55 @@ class user extends model {
 
     /**
      * Get an array of all the courses this user is enrolled on in the specified role
-     * @param string $role Shortname of the role, e.g. 'student'.
+     * @param array $roleids Array of role IDs to use.
      * @return array Array of courses.
      */
-    public function get_courses(string $role) {
+    public function get_courses(array $roleids = null) {
 
         global $DB;
 
-        // TODO: Included/Excluded categories and courses.
+        $plp = new plp();
 
         // See if we have already loaded this.
         if (!empty($this->courses)) {
             return $this->courses;
         }
 
-        $courses = $DB->get_records_sql("SELECT DISTINCT c.*
+        $params = ['contextlevel' => CONTEXT_COURSE, 'userid' => $this->get('id')];
+        $extrasql = '';
+
+        if (!is_null($roleids)) {
+            list($inorequal, $extraparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED, 'roleparam');
+            $extrasql .= ' AND r.id ' . $inorequal;
+            $params = $params + $extraparams;
+        }
+
+        // Exclude any excluded categories, or only include any specifically included categories.
+        $categories = explode(',', $plp->get_setting('categories'));
+        if ($plp->get_setting('category_usage') == 'exc') {
+
+            list($notinorequal, $extraparams) = $DB->get_in_or_equal($categories, SQL_PARAMS_NAMED, 'catparam', false);
+            $extrasql .= ' AND cc.id ' . $notinorequal;
+            $params = $params + $extraparams;
+
+        } else if ($plp->get_setting('category_usage') == 'inc') {
+
+            list($inorequal, $extraparams) = $DB->get_in_or_equal($categories, SQL_PARAMS_NAMED, 'catparam');
+            $extrasql .= ' AND cc.id ' . $inorequal;
+            $params = $params + $extraparams;
+
+        }
+
+        return $DB->get_records_sql("SELECT DISTINCT c.*
                                               FROM {course} c
+                                              JOIN {course_categories} cc ON cc.id = c.category
                                               JOIN {context} x ON x.instanceid = c.id
                                               JOIN {role_assignments} ra ON ra.contextid = x.id
                                               JOIN {role} r ON r.id = ra.roleid
                                               WHERE x.contextlevel = :contextlevel
                                               AND ra.userid = :userid
-                                              AND r.shortname = :role
-                                              ORDER BY c.shortname ASC",
-            ['contextlevel' => CONTEXT_COURSE, 'userid' => $this->get('id'), 'role' => $role]);
-
-        return $courses;
+                                              {$extrasql}
+                                              ORDER BY c.shortname ASC", $params);
 
     }
 
@@ -111,6 +141,8 @@ class user extends model {
      * @return array Array of contexts
      */
     public function get_permission_contexts(int $userid) : array {
+
+        $plp = new plp();
 
         // If we have already loaded this, just retrieve it.
         if (array_key_exists($userid, $this->permissions)) {
@@ -133,7 +165,7 @@ class user extends model {
 
         // Course Teacher - Teachers will have the 'view' capability on a course, so we check it on course contexts.
         // So we find every course the specified user is on which this user is also on, then check the capability there.
-        $studentcourses = $student->get_courses('student'); // TODO: Get the roles from a setting.
+        $studentcourses = $student->get_courses($plp->get_roles('student'));
         foreach ($studentcourses as $course) {
             // Does our current user have the view capability on this course context?
             $context = context_course::instance($course->id);

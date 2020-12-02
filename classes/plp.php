@@ -207,9 +207,9 @@ class plp {
     /**
      * Get the role IDs configured for a particular named role within the PLP.
      * @param string $name E.g. 'tutor', 'student', 'teacher', or 'manager'.
-     * @return mixed
+     * @return array
      */
-    public function get_roles(string $name) {
+    public function get_roles(string $name) : ?array {
 
         global $DB;
 
@@ -230,11 +230,6 @@ class plp {
         $roles = array_filter($setting, function($id) use ($DB) {
             return $DB->get_record('role', ['id' => $id]);
         });
-
-        // However, if it's only 1 element, we can just return that.
-        if (count($roles) == 1) {
-            $roles = $roles[0];
-        }
 
         // If at this point we have nothing, set it to null, rather than an empty array.
         if (empty($roles)) {
