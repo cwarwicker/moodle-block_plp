@@ -30,11 +30,13 @@ $string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
+$string['error:form:required'] = 'Field ({$a}) is required.';
 $string['error:invalidclassproperty'] = 'Property ({$a}) does not exist on this class.';
 $string['error:mis:connection'] = 'Unable to connect to external database.';
 $string['error:mis:type'] = 'Database type ({$a}) is not supported.';
 $string['error:role:create'] = 'Something went wrong creating the {$a} role.';
 $string['error:templates:invalid'] = 'Invalid template file';
+$string['error:xml:content'] = 'To output as XML the content provided must be an array. (Found: {$a})';
 $string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
 
 // Capabilities.
@@ -47,6 +49,8 @@ $string['plp:view_any'] = 'View any user\'s PLP';
 $string['title:core:config:overview'] = 'Configuration - Overview';
 $string['title:core:config:mis'] = 'Configuration - MIS Connections';
 $string['title:core:config:mis:edit'] = 'Configuration - MIS Connections - Edit';
+$string['title:core:config:mis:enabledisable'] = $string['title:core:config:mis'];
+$string['title:core:config:mis:delete'] = $string['title:core:config:mis'];
 $string['title:core:config:settings'] = 'Configuration - General Settings';
 
 // General strings.
@@ -58,8 +62,11 @@ $string['configsaved'] = 'Configuration settings saved';
 $string['connections'] = 'Connections';
 $string['creatednewrole'] = 'Created new Moodle role [%d] %s (%s) - %s';
 
+$string['delete:sure'] = 'Are you sure you want to delete <strong>{$a}</strong>?';
+$string['disable'] = 'Disable';
 $string['disabled'] = 'Disabled';
 
+$string['enable'] = 'Enable';
 $string['enabled'] = 'Enabled';
 $string['environment'] = 'Environment';
 
@@ -71,9 +78,18 @@ $string['left'] = 'Left';
 
 $string['mis'] = 'MIS';
 $string['mis:database'] = 'Database Name';
+$string['mis:deleted'] = 'MIS Connection ({$a}) deleted';
 $string['mis:host'] = 'Host';
 $string['mis:long'] = 'Management Information System(s) - Connections';
 $string['mis:newconnection'] = 'Create new connection';
+$string['mis:saved'] = 'MIS Connection saved';
+$string['mis:test'] = 'Test Connection';
+$string['mis:test:ok'] = 'Connection successfully established!';
+$string['mis:type:mariadb'] = 'MariaDB';
+$string['mis:type:mysqli'] = 'Improved MySQL';
+$string['mis:type:oci'] = 'Oracle';
+$string['mis:type:pgsql'] = 'PostgreSQL';
+$string['mis:type:sqlsrv'] = 'Microsoft SQL Server';
 
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';

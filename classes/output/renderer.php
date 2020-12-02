@@ -26,9 +26,14 @@
 
 namespace block_plp\output;
 
+use block_plp\models\mis_connection;
+use flexible_table;
+use moodle_url;
 use plugin_renderer_base;
 
 defined('MOODLE_INTERNAL') or die();
+
+require_once($CFG->libdir . '/tablelib.php');
 
 /**
  * Renderer class
@@ -40,5 +45,59 @@ defined('MOODLE_INTERNAL') or die();
  *
  */
 class renderer extends plugin_renderer_base {
+
+    /**
+     * Return a general confirmation box for deleting something.
+     * @param string $name The name/title of the "thing" being deleted.
+     * @param moodle_url $yesurl
+     * @param moodle_url $nourl
+     * @return mixed
+     */
+    public function render_confirm_delete(string $name, moodle_url $yesurl, moodle_url $nourl) {
+        return $this->output->confirm(get_string('delete:sure', 'block_plp', $name), $yesurl, $nourl);
+    }
+
+    /**
+     * Render the MIS connections table.
+     * @return mixed
+     */
+    public function mis_connections() {
+
+        ob_start();
+
+        $table = new flexible_table('mis-connections');
+        $table->define_columns(['name', 'type', 'host', 'username', 'password', 'database', 'actions']);
+        $table->define_headers([
+            get_string('name'),
+            get_string('type', 'block_plp'),
+            get_string('mis:host', 'block_plp'),
+            get_string('username'),
+            get_string('password'),
+            get_string('mis:database', 'block_plp'),
+            ''
+        ]);
+        $table->define_baseurl( new moodle_url('/blocks/plp/config.php', ['page' => 'mis']) );
+        $table->setup();
+
+        $connections = mis_connection::all();
+        foreach ($connections as $connection) {
+            $table->add_data([
+                $connection->get('name'),
+                $connection->get('type'),
+                $connection->get('host'),
+                $connection->get('username'),
+                '********',
+                $connection->get('dbname'),
+                $connection->get_actions()
+            ]);
+        }
+
+        $table->finish_output();
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        return $output;
+
+    }
 
 }

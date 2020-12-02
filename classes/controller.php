@@ -27,6 +27,8 @@
 namespace block_plp;
 
 use coding_exception;
+use moodle_exception;
+use moodle_url;
 use ReflectionClass;
 
 defined('MOODLE_INTERNAL') or die();
@@ -108,7 +110,7 @@ abstract class controller {
      */
     protected function get_component() : string {
         $reflect = new ReflectionClass($this);
-        return str_replace('\\controllers', '\\templates', $reflect->getNamespaceName());
+        return str_replace(['block_plp\\', '\\controllers'], '', $reflect->getNamespaceName());
     }
 
     /**
@@ -120,7 +122,7 @@ abstract class controller {
      */
     protected function get_component_name() : string {
         $reflect = new ReflectionClass($this);
-        return str_replace('_controller', '_template', $reflect->getShortName());
+        return str_replace('_controller', '', $reflect->getShortName());
     }
 
     /**
@@ -132,10 +134,10 @@ abstract class controller {
 
         // By default, the template we are wanting to use is likely in the same directory as the controller, but
         // inside the /templates/ sub directory and namespace. So we can work out its path from the controllers path.
-        $namespace = $this->get_component();
+        $component = $this->get_component();
         $name = $this->get_component_name();
 
-        $class = $namespace . '\\' . $name;
+        $class = 'block_plp\\' . $component . '\\templates\\' . $name . '_template';
 
         // All controllers should have a matching template, even if it's just a blank shell.
         if (!class_exists($class)) {
@@ -240,6 +242,26 @@ abstract class controller {
     }
 
     /**
+     * Get the URL of the page we are on.
+     * @param array $data Extra array of data to append to the url, besides the page and action.
+     * @return moodle_url
+     */
+    public function get_url(array $data = array()) : moodle_url {
+
+        $name = $this->get_component_name();
+        $page = $this->get_page();
+        $action = $this->get_action();
+        $params = [];
+        $params['page'] = $page;
+        if ($this->get_action()) {
+            $params['action'] = $action;
+        }
+        $params = $params + $data;
+        return new moodle_url('/blocks/plp/' . $name . '.php', $params);
+
+    }
+
+    /**
      * Check if this controller actually has the specified page as a method.
      * @return bool
      */
@@ -328,6 +350,62 @@ abstract class controller {
 
         // Assuming everything went okay up to this point, we can now render the template.
         $this->get_template()->render();
+
+    }
+
+    /**
+     * Given an array of parameters that we want, try to get them, catching any errors, so that we can return the response
+     * correctly, based on the template response type, e.g. JSON, HTML, etc...
+     * @param array $parameters
+     * @return array
+     * @throws moodle_exception
+     */
+    protected function get_required_parameters(array $parameters) {
+
+        try {
+
+            $return = [];
+
+            // If it's not an HTML response, then it's likely from an AJAX request or web service, so we always need the sesskey.
+            // Though we don't actually need to return it, just check it.
+            if ($this->get_template()->get_response_type() !== template::RESPONSE_TYPE_HTML) {
+                require_sesskey();
+            }
+
+            // Loop through optional and required parameters and try to get them all.
+            foreach ($parameters as $parameter) {
+
+                // If the array has the 'default' key, then it is an optional param, otherwise it's required.
+                if (array_key_exists('default', $parameter)) {
+                    $return[$parameter['name']] = optional_param($parameter['name'], $parameter['default'], $parameter['type']);
+                } else {
+                    $return[$parameter['name']] = required_param($parameter['name'], $parameter['type']);
+                }
+
+            }
+
+            return $return;
+
+        } catch (moodle_exception $e) {
+
+            switch ($this->get_template()->get_response_type()) {
+
+                case template::RESPONSE_TYPE_JSON:
+                case template::RESPONSE_TYPE_XML:
+                    $this->get_template()->set_content(['result' => false, 'error' => $e->getMessage()]);
+                    $this->get_template()->render();
+                    exit;
+                break;
+
+                case template::RESPONSE_TYPE_HTML:
+                default:
+                    // Re-throw the error to the HTML.
+                    throw $e;
+                break;
+
+            }
+
+        }
 
     }
 

@@ -28,6 +28,7 @@ namespace block_plp\core\templates;
 use block_plp\moodle;
 use block_plp\plp;
 use block_plp\template as base_template;
+use moodle_url;
 use moodleform;
 
 defined('MOODLE_INTERNAL') or die();
@@ -86,10 +87,10 @@ class config_template extends base_template {
     }
 
     /**
-     * Build up the template to be displayed for the config overview page.
+     * Render the template for the overview page.
      * @return bool
      */
-    public function call_overview() {
+    public function page_overview() : bool {
 
         // Get data to be passed into template.
         $moodle = new moodle();
@@ -109,13 +110,73 @@ class config_template extends base_template {
     }
 
     /**
-     * Deal with the form submission(s) on the settings page.
+     * Render the template for the settings page.
      * @return bool
      */
-    public function call_settings() {
+    public function page_settings() : bool {
 
         $this->add_var('form', $this->get_form()->render());
         $this->add_var('settings_selected', true);
+        return true;
+
+    }
+
+    /**
+     * Render the template for the MIS page.
+     * @return bool
+     */
+    public function page_mis() : bool {
+
+        global $PAGE;
+
+        // Render the default template for the MIS action.
+        $renderer = $PAGE->get_renderer('block_plp');
+        $this->add_var('mis_selected', true);
+        $this->add_var('url_new', new moodle_url('/blocks/plp/config.php', ['page' => 'mis', 'action' => 'edit', 'id' => 0]));
+        $this->add_var('connections', $renderer->mis_connections());
+        return true;
+
+    }
+
+    /**
+     * Display the editing form for an MIS connection
+     * @return bool
+     */
+    public function action_mis_edit() {
+
+        $title = ($this->connection->exists()) ? $this->connection->get('name') : get_string('mis:newconnection', 'block_plp');
+
+        // Render the form in the mustache template.
+        $this->add_var('mis_selected', true);
+        $this->add_var('form', $this->get_form()->render());
+        $this->add_var('connection_title', $title);
+
+        return true;
+
+    }
+
+    /**
+     * Display the deletion confirmation screen for an MIS connection.
+     * @return bool
+     */
+    public function action_mis_delete() {
+
+        global $PAGE;
+
+        $renderer = $PAGE->get_renderer('block_plp');
+
+        $this->set_specific_mustache_file('block_plp/generic');
+        $this->add_var('data', $renderer->render_confirm_delete($this->connection->get('name'), new moodle_url
+        ('/blocks/plp/config.php', [
+            'page' => 'mis',
+            'action' => 'delete',
+            'id' => $this->connection->get('id'),
+            'sesskey' => sesskey(),
+            'confirmed' => 1
+        ]), new moodle_url('/blocks/plp/config.php', [
+            'page' => 'mis'
+        ])));
+
         return true;
 
     }

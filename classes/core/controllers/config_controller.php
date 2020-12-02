@@ -27,8 +27,11 @@
 namespace block_plp\core\controllers;
 
 use block_plp\controller as base_controller;
+use block_plp\core\forms\mis_connection_form;
 use block_plp\core\forms\settings_form;
+use block_plp\models\mis_connection;
 use block_plp\plp;
+use block_plp\template;
 use core\notification;
 
 defined('MOODLE_INTERNAL') or die();
@@ -45,10 +48,10 @@ defined('MOODLE_INTERNAL') or die();
 class config_controller extends base_controller {
 
     /**
-     * Controller action to run on the settings config page.
+     * Controller method to run on the settings config page.
      * @return bool
      */
-    public function call_settings() {
+    public function page_settings() {
 
         $form = new settings_form();
 
@@ -78,6 +81,158 @@ class config_controller extends base_controller {
         // Pass the form object through to the template for rendering.
         $this->get_template()->set_form($form);
 
+        return true;
+
+    }
+
+    /**
+     * Controller method to run on the MIS config page.
+     * @return bool
+     */
+    public function page_mis() {
+        return true;
+    }
+
+    /**
+     * Delete an MIS connection
+     * @return bool
+     */
+    public function action_mis_delete() {
+
+        $params = $this->get_required_parameters([
+            ['name' => 'id', 'type' => PARAM_INT],
+            ['name' => 'confirmed', 'type' => PARAM_INT, 'default' => 0]
+        ]);
+
+        $connection = mis_connection::load($params['id']);
+        $this->get_template()->connection = $connection;
+
+        // If it's confirmed, run the delete.
+        if ($params['confirmed']) {
+
+            // Delete the MIS connection and print the success notification.
+            $connection->delete();
+            notification::success(get_string('mis:deleted', 'block_plp', $connection->get('name')));
+
+            // Then redirect. We set the action to NULL here so that the get_url() will return just the MIS connection list page.
+            $this->set_action(null);
+            redirect($this->get_url());
+
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Change the enabled status of an MIS connection
+     * @return bool|int
+     */
+    public function action_mis_enabledisable() {
+
+        $params = $this->get_required_parameters([
+            ['name' => 'id', 'type' => PARAM_INT]
+        ]);
+
+        $connection = mis_connection::load($params['id']);
+        if ($connection->exists() && confirm_sesskey()) {
+            $connection->toggle_enabled();
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Edit an MIS connection or create a new one.
+     * @return bool
+     */
+    public function action_mis_edit() {
+
+        // Load the MIS connection record into an object.
+        $id = required_param('id', PARAM_INT);
+        $connection = mis_connection::load($id);
+
+        // Load the form to display.
+        $form = new mis_connection_form(null, $connection);
+
+        // If the form is submitted.
+        if ($data = $form->get_data()) {
+
+            $connection->set('name', $data->name);
+            $connection->set('type', $data->type);
+            $connection->set('host', $data->host);
+            $connection->set('dbname', $data->database);
+            $connection->set('username', $data->user);
+            $connection->set('userpassword', $data->pass);
+            $connection->set('enabled', $data->enabled);
+            $connection->save();
+
+            notification::success(get_string('mis:saved', 'block_plp'));
+            redirect($this->get_url(['id' => $connection->get('id')]));
+
+        } else {
+            $form->set_data([
+                'id' => $connection->get('id'),
+                'name' => $connection->get('name'),
+                'type' => $connection->get('type'),
+                'host' => $connection->get('host'),
+                'database' => $connection->get('dbname'),
+                'user' => $connection->get('username'),
+                'pass' => $connection->get('userpassword'),
+                'enabled' => $connection->get('enabled'),
+            ]);
+        }
+
+        $this->get_template()->connection = $connection;
+        $this->get_template()->set_form($form);
+        $this->get_template()->add_var('connection', $connection->to_array());
+        return true;
+
+    }
+
+    /**
+     * Run the MIS Connection test, using the supplied details.
+     * Returns JSON response to the template.
+     * @return bool
+     */
+    public function action_mis_test() {
+
+        $this->get_template()->set_response_type(template::RESPONSE_TYPE_JSON);
+
+        // This is a JSON response, so we need to wrap our parameter checks and return an error in the JSON if they do not pass.
+        $response = [];
+
+        // Try and get these parameters from the AJAX request.
+        list('type' => $type, 'host' => $host, 'database' => $database, 'user' => $user, 'pass' => $pass) =
+            $this->get_required_parameters([
+                ['name' => 'type', 'type' => PARAM_TEXT],
+                ['name' => 'host', 'type' => PARAM_TEXT],
+                ['name' => 'database', 'type' => PARAM_TEXT],
+                ['name' => 'user', 'type' => PARAM_TEXT],
+                ['name' => 'pass', 'type' => PARAM_TEXT],
+            ], $this->get_template());
+
+        // Build the connection.
+        $connection = new mis_connection();
+        $connection->set('type', $type);
+        $connection->set('host', $host);
+        $connection->set('dbname', $database);
+        $connection->set('username', $user);
+        $connection->set('userpassword', $pass);
+
+        // Try and connect using these details.
+        $db = $connection->connect();
+        if (!$db) {
+            $response['result'] = false;
+            $response['error'] = $connection->get_error();
+        } else {
+            $response['result'] = true;
+            $response['success'] = 'yeah boi';
+        }
+
+        $this->get_template()->set_content($response);
         return true;
 
     }

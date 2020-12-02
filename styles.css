@@ -211,6 +211,10 @@ table.block_plp-sys_info td {
     vertical-align: top;
 }
 
+div.block_plp-mis_connection_result {
+    margin-top: 10px;
+}
+
 
 /**
  * General, repeatable styles used across a multitude of pages.
@@ -299,4 +303,8 @@ a.block_plp-icon:visited {
     box-shadow: none;
     outline: none;
     background: none;
+}
+
+a.block_plp-action {
+    margin: 0 5px;
 }

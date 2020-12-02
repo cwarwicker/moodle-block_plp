@@ -26,12 +26,14 @@
 
 namespace block_plp;
 
+use coding_exception;
 use context;
 use context_system;
 use moodle_exception;
 use moodle_url;
 use ReflectionClass;
 use renderer_base;
+use SimpleXMLElement;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -45,6 +47,21 @@ defined('MOODLE_INTERNAL') or die();
  *
  */
 abstract class template {
+
+    /**
+     * Response type for standard HTML page.
+     */
+    const RESPONSE_TYPE_HTML = 'html';
+
+    /**
+     * Response type for JSON response.
+     */
+    const RESPONSE_TYPE_JSON = 'json';
+
+    /**
+     * Response type for XML response.
+     */
+    const RESPONSE_TYPE_XML = 'xml';
 
     /**
      * Array of named variables we will be passing into the template.
@@ -89,6 +106,18 @@ abstract class template {
     protected $specificmustachefile;
 
     /**
+     * The response type of the template.
+     * @var string
+     */
+    protected $responsetype;
+
+    /**
+     * If set, this specific content will be rendered and nothing else.
+     * @var mixed
+     */
+    protected $content;
+
+    /**
      * Construct the template object.
      */
     public function __construct() {
@@ -99,6 +128,7 @@ abstract class template {
         $PAGE->set_context($context);
 
         // Set default property values.
+        $this->set_response_type(static::RESPONSE_TYPE_HTML);
         $this->set_context($context);
         $this->set_renderer($PAGE->get_renderer('block_plp'));
 
@@ -282,6 +312,42 @@ abstract class template {
     }
 
     /**
+     * Get the template's response type.
+     * @return string
+     */
+    public function get_response_type() : string {
+        return $this->responsetype;
+    }
+
+    /**
+     * Set the template's response type.
+     * @param string $type
+     * @return $this
+     */
+    public function set_response_type(string $type) {
+        $this->responsetype = $type;
+        return $this;
+    }
+
+    /**
+     * Get the template's specific content.
+     * @return mixed
+     */
+    public function get_content() {
+        return $this->content;
+    }
+
+    /**
+     * Set the template's specific content.
+     * @param mixed $content
+     * @return $this
+     */
+    public function set_content($content) {
+        $this->content = $content;
+        return $this;
+    }
+
+    /**
      * Call the template's page/action method.
      * @return bool The result of calling the method. If return is not TRUE, will be assumed something went wrong.
      */
@@ -372,32 +438,133 @@ abstract class template {
 
         $plp = new plp();
 
-        // Start by setting up the Moodle page.
-        $PAGE->set_url(new moodle_url($_SERVER['REQUEST_URI']));
-        $PAGE->set_title( $this->get_default_page_title() );
-        $PAGE->set_cacheable(true);
-        $PAGE->set_pagelayout($plp->get_setting('layout'));
+        // Send the HTTP headers for the response type we are using.
+        $this->send_headers();
 
-        echo $OUTPUT->header();
+        // If we send through content direct to this method, we are rendering just that and not the rest of the page.
+        if ($this->get_content() !== null) {
+            $this->render_content();
+        } else {
 
-        // There may not be a mustache file for the action we ran, in which case we will want to fall back to a default.
-        // So, we need to work out which mustache files to try loading and see if any of them can be loaded.
-        $files = $this->get_possible_template_files();
-        foreach ($files as $index => $file) {
-            try {
-                // If we can successfully load this musctache file, then break out of the loop and don't try the others.
-                echo $this->get_renderer()->render_from_template($file, $this->get_vars());
-                break;
-            } catch (moodle_exception $ex) {
-                // If we catch the exception, do nothing and try the next file.
-                // However, if we reach the last file and that won't load either, then we can throw the exception back.
-                if ($index == count($files) - 1) {
-                    throw $ex;
+            // Start by setting up the Moodle page.
+            $PAGE->set_url(new moodle_url($_SERVER['REQUEST_URI']));
+            $PAGE->set_title( $this->get_default_page_title() );
+            $PAGE->set_cacheable(true);
+            $PAGE->set_pagelayout($plp->get_setting('layout'));
+
+            // Load any scripts required by this page.
+            $this->load_scripts();
+
+            echo $OUTPUT->header();
+
+            // There may not be a mustache file for the action we ran, in which case we will want to fall back to a default.
+            // So, we need to work out which mustache files to try loading and see if any of them can be loaded.
+            $files = $this->get_possible_template_files();
+            foreach ($files as $index => $file) {
+                try {
+                    // If we can successfully load this musctache file, then break out of the loop and don't try the others.
+                    echo $this->get_renderer()->render_from_template($file, $this->get_vars());
+                    break;
+                } catch (moodle_exception $ex) {
+                    // If we catch the exception, do nothing and try the next file.
+                    // However, if we reach the last file and that won't load either, then we can throw the exception back.
+                    if ($index == count($files) - 1) {
+                        throw $ex;
+                    }
                 }
             }
+
+            echo $OUTPUT->footer();
+
         }
 
-        echo $OUTPUT->footer();
+    }
+
+    /**
+     * See if there are any scripts to load for this page.
+     * @return void
+     */
+    protected function load_scripts() {
+
+        global $CFG, $PAGE;
+
+        $path = $this->get_component() . '_' . $this->get_component_name() . '_' . $this->get_page();
+        if (file_exists($CFG->dirroot . '/blocks/plp/amd/src/' . $path . '.js')) {
+            $PAGE->requires->js_call_amd('block_plp/' . $path, 'init');
+        }
+
+    }
+
+    /**
+     * Render specific content, depending on the response type.
+     * @return void
+     */
+    protected function render_content() {
+
+        $content = $this->get_content();
+
+        switch ($this->responsetype) {
+
+            case static::RESPONSE_TYPE_JSON:
+
+                // If the content is an object, cast it to an array.
+                if (is_object($content) && $content instanceof model) {
+                    $content = $content->to_array();
+                } else if (is_object($content)) {
+                    $content = (array)$content;
+                }
+
+                echo json_encode($content);
+
+            break;
+
+            case static::RESPONSE_TYPE_XML:
+
+                $xml = new SimpleXMLElement('<root/>');
+
+                // To output as XML, the content must be an array.
+                if (!is_array($content)) {
+                     $xml->addChild('error', get_string('error:xml:content', 'block_plp', gettype($content)));
+                } else {
+                    array_walk_recursive($content, array($xml, 'addChild'));
+                }
+                echo $xml->asXML();
+
+            break;
+
+            // HTML or anything else, just render as-is.
+            case static::RESPONSE_TYPE_HTML:
+            default:
+                echo $content;
+
+        }
+
+    }
+
+    /**
+     * Send relevant HTTP headers, depending on response type of template.
+     * @return void
+     */
+    protected function send_headers() {
+
+        switch ($this->responsetype) {
+
+            // Send JSON headers.
+            case static::RESPONSE_TYPE_JSON:
+                header('Content-type: application/json');
+            break;
+
+            // Send XML headers.
+            case static::RESPONSE_TYPE_XML:
+                header('Content-Type: application/xml; charset=utf-8');
+            break;
+
+            // For HTML or anything else, we can just leave Moodle to deal with the headers.
+            case static::RESPONSE_TYPE_HTML:
+            default:
+                return;
+
+        }
 
     }
 

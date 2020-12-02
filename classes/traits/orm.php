@@ -142,8 +142,20 @@ trait orm {
         } else {
             // If it's new, we will need to pass the values through into this method.
             unset($obj->id);
-            return $DB->insert_record(static::$table, $obj);
+            $this->id = $DB->insert_record(static::$table, $obj);
+            return $this->id;
         }
+
+    }
+
+    /**
+     * Delete this record from the database.
+     * @return bool
+     */
+    public function delete() {
+
+        global $DB;
+        return $DB->delete_records(static::$table, ['id' => $this->get('id')]);
 
     }
 
