@@ -186,6 +186,28 @@ trait orm {
     }
 
     /**
+     * Find a specific record of this type and return the object
+     * @param array $filters Conditions to be passed into the get_record() method.
+     * @return model|null Either the object instance, or null if not found.
+     */
+    public static function find(array $filters) {
+
+        global $DB;
+
+        $class = get_called_class();
+        $record = $DB->get_record(static::$table, $filters, 'id');
+        if ($record) {
+            $obj = new $class($record->id);
+            if ($obj->exists()) {
+                return $obj;
+            }
+        }
+
+        return null;
+
+    }
+
+    /**
      * Search for records of this type and return an array of objects.
      * @param array $filters Conditions to be passed into the get_records() method.
      * @return array

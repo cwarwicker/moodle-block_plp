@@ -165,9 +165,11 @@ class plp {
      * Update or insert a setting value for the PLP system.
      * @param string $name Named setting
      * @param mixed $value Value to set
+     * @param int|null $pluginid (Optional) Plugin ID that the setting is related to.
+     * @param int|null $userid (Optional) User ID that the setting is related to.
      * @return bool|int
      */
-    public function update_setting(string $name, $value) {
+    public function update_setting(string $name, $value, int $pluginid = null, int $userid = null) {
 
         global $DB;
 
@@ -183,8 +185,8 @@ class plp {
         }
 
         $obj = [];
-        $obj['userid'] = null;
-        $obj['pluginid'] = null;
+        $obj['userid'] = $userid;
+        $obj['pluginid'] = $pluginid;
         $obj['setting'] = $name;
 
         // If the value is null or empty, that means we are basically deleting the setting, so let's actually delete it.
