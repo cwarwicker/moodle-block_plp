@@ -27,7 +27,9 @@
 namespace block_plp\output;
 
 use block_plp\models\mis_connection;
+use block_plp\models\plugin;
 use flexible_table;
+use html_writer;
 use moodle_url;
 use plugin_renderer_base;
 
@@ -59,9 +61,9 @@ class renderer extends plugin_renderer_base {
 
     /**
      * Render the MIS connections table.
-     * @return mixed
+     * @return string
      */
-    public function mis_connections() {
+    public function mis_connections() : string {
 
         ob_start();
 
@@ -89,6 +91,48 @@ class renderer extends plugin_renderer_base {
                 '********',
                 $connection->get('dbname'),
                 $connection->get_actions()
+            ]);
+        }
+
+        $table->finish_output();
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        return $output;
+
+    }
+
+    /**
+     * Render the plugins table
+     * @return string
+     */
+    public function plugins() : string {
+
+        ob_start();
+
+        $table = new flexible_table('plugins');
+        $table->define_columns(['name', 'title', 'component', 'version', 'settings', 'actions']);
+        $table->define_headers([
+            get_string('plugin', 'block_plp'),
+            get_string('displayname', 'block_plp'),
+            get_string('path', 'block_plp'),
+            get_string('version'),
+            '',
+            ''
+        ]);
+        $table->define_baseurl( new moodle_url('/blocks/plp/config.php', ['page' => 'plugins']) );
+        $table->setup();
+
+        $plugins = plugin::all();
+        foreach ($plugins as $plugin) {
+            $table->add_data([
+                $plugin->get('name'),
+                $plugin->get('title'),
+                $plugin->get('path'),
+                $plugin->get('version'),
+                html_writer::link(new moodle_url('/blocks/plp/config.php', ['page' => 'plugin', 'id' => $plugin->get('id')]),
+                    get_string('settings')),
+                $plugin->get_actions()
             ]);
         }
 

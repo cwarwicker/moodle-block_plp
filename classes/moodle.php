@@ -25,6 +25,8 @@
  */
 namespace block_plp;
 
+use core_plugin_manager;
+
 defined('MOODLE_INTERNAL') or die();
 
 /**
@@ -122,6 +124,35 @@ class moodle {
 
         return $layouts;
 
+    }
+
+    /**
+     * Return an array of installed plugins of a given type
+     * @param string $type E.g. 'block' or 'mod'
+     * @return array Array of plugin names
+     */
+    public function get_plugins(string $type = null) : array {
+
+        // Get the plugin manager object and find out the path to this type of plugin for later use.
+        $manager = core_plugin_manager::instance();
+        $plugins = [];
+
+        // If we don't specify a type, we want to get all of them.
+        if (is_null($type)) {
+            $types = $manager->get_plugin_types();
+        } else {
+            $types = [$type];
+        }
+
+        foreach ($types as $type => $path) {
+            $plugins[$type] = [];
+            $results = array_keys($manager->get_installed_plugins($type));
+            foreach ($results as $result) {
+                $plugins[$type][$path . DIRECTORY_SEPARATOR . $result] = $result;
+            }
+        }
+
+        return $plugins;
     }
 
 }

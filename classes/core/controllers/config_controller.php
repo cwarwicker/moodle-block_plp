@@ -27,9 +27,11 @@
 namespace block_plp\core\controllers;
 
 use block_plp\controller as base_controller;
+use block_plp\core\forms\install_plugin_form;
 use block_plp\core\forms\mis_connection_form;
 use block_plp\core\forms\settings_form;
 use block_plp\models\mis_connection;
+use block_plp\models\plugin;
 use block_plp\plp;
 use block_plp\template;
 use core\notification;
@@ -51,7 +53,7 @@ class config_controller extends base_controller {
      * Controller method to run on the settings config page.
      * @return bool
      */
-    public function page_settings() {
+    public function page_settings() : bool {
 
         $form = new settings_form();
 
@@ -87,9 +89,9 @@ class config_controller extends base_controller {
 
     /**
      * Controller method to run on the MIS config page.
-     * @return bool
+     * @return true
      */
-    public function page_mis() {
+    public function page_mis() : bool {
         return true;
     }
 
@@ -97,7 +99,7 @@ class config_controller extends base_controller {
      * Delete an MIS connection
      * @return bool
      */
-    public function action_mis_delete() {
+    public function action_mis_delete() : bool {
 
         $params = $this->get_required_parameters([
             ['name' => 'id', 'type' => PARAM_INT],
@@ -126,9 +128,9 @@ class config_controller extends base_controller {
 
     /**
      * Change the enabled status of an MIS connection
-     * @return bool|int
+     * @return bool
      */
-    public function action_mis_enabledisable() {
+    public function action_mis_enabledisable() : bool {
 
         $params = $this->get_required_parameters([
             ['name' => 'id', 'type' => PARAM_INT]
@@ -148,7 +150,7 @@ class config_controller extends base_controller {
      * Edit an MIS connection or create a new one.
      * @return bool
      */
-    public function action_mis_edit() {
+    public function action_mis_edit() : bool {
 
         // Load the MIS connection record into an object.
         $id = required_param('id', PARAM_INT);
@@ -197,7 +199,7 @@ class config_controller extends base_controller {
      * Returns JSON response to the template.
      * @return bool
      */
-    public function action_mis_test() {
+    public function action_mis_test() : bool {
 
         $this->get_template()->set_response_type(template::RESPONSE_TYPE_JSON);
 
@@ -233,6 +235,73 @@ class config_controller extends base_controller {
         }
 
         $this->get_template()->set_content($response);
+        return true;
+
+    }
+
+    /**
+     * Plugins page can be used in this controller.
+     * @return true
+     */
+    public function page_plugins() : bool {
+
+        $form = new install_plugin_form();
+
+        // TODO: Process form.
+
+        // Pass the form object through to the template for rendering.
+        $this->get_template()->set_form($form);
+
+        return true;
+    }
+
+    /**
+     * Change the enabled status of a plugin
+     * @return bool
+     */
+    public function action_plugins_enabledisable() : bool {
+
+        $params = $this->get_required_parameters([
+            ['name' => 'id', 'type' => PARAM_INT]
+        ]);
+
+        $plugin = plugin::load($params['id']);
+        if ($plugin->exists() && confirm_sesskey()) {
+            $plugin->toggle_enabled();
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Delete a plugin
+     * @return bool
+     */
+    public function action_plugins_delete() : bool {
+
+        $params = $this->get_required_parameters([
+            ['name' => 'id', 'type' => PARAM_INT],
+            ['name' => 'confirmed', 'type' => PARAM_INT, 'default' => 0]
+        ]);
+
+        $plugin = plugin::load($params['id']);
+        $this->get_template()->plugin = $plugin;
+
+        // If it's confirmed, run the delete.
+        if ($params['confirmed']) {
+
+            // Delete the MIS connection and print the success notification.
+            $plugin->delete();
+            notification::success(get_string('plugin:deleted', 'block_plp', $plugin->get('name')));
+
+            // Then redirect. We set the action to NULL here so that the get_url() will return just the MIS connection list page.
+            $this->set_action(null);
+            redirect($this->get_url());
+
+        }
+
         return true;
 
     }

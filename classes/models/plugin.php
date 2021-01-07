@@ -27,6 +27,7 @@ namespace block_plp\models;
 
 use block_plp\model;
 use block_plp\plp;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -96,6 +97,14 @@ class plugin extends model {
     protected $user;
 
     /**
+     * Check if the plugin is enabled
+     * @return bool
+     */
+    public function is_enabled() : bool {
+        return ($this->enabled == 1);
+    }
+
+    /**
      * Method to install the plugin and any tables/data it requires.
      * @return bool
      */
@@ -109,6 +118,32 @@ class plugin extends model {
      */
     public function uninstall() : bool {
         return false;
+    }
+
+    /**
+     * Get all of the plugin's settings.
+     * @param bool $includedefaults Should we include default values if none are found for those keys?
+     * @return array
+     */
+    public function get_settings($includedefaults = false) : array {
+
+        if (!$this->settings) {
+            $this->load_settings();
+        }
+
+        $settings = $this->settings;
+
+        // If we want to include the defaults, add those in if they are missing from the database.
+        if ($includedefaults) {
+            foreach ($this->defaultsettings as $default => $value) {
+                if (!array_key_exists($default, $settings)) {
+                    $settings[$default] = $value;
+                }
+            }
+        }
+
+        return $settings;
+
     }
 
     /**
@@ -163,8 +198,23 @@ class plugin extends model {
      * @return bool|int
      */
     public function update_setting(string $name, $value) {
+
+        // We can only update the setting, if the plugin exists.
+        if (!$this->exists()) {
+            return false;
+        }
+
         $plp = new plp();
         return $plp->update_setting($name, $value, $this->id);
+
+    }
+
+    /**
+     * Toggle the value of the enabled setting to enable/disable.
+     */
+    public function toggle_enabled() {
+        $this->set('enabled', !$this->get('enabled'));
+        return $this->save();
     }
 
     /**
@@ -175,7 +225,39 @@ class plugin extends model {
         return $this->user;
     }
 
+    /**
+     * Display the actions for this row in the plugins table
+     * @return string
+     */
+    public function get_actions() : string {
 
+        global $PAGE;
+
+        $renderer = $PAGE->get_renderer('block_plp');
+
+        return $renderer->render_from_template('block_plp/actions', [
+            'enabledisable_url' => new moodle_url('/blocks/plp/config.php', [
+                'page' => 'plugins',
+                'action' => 'enabledisable',
+                'id' => $this->get('id'),
+                'sesskey' => sesskey()
+            ]),
+            'enabledisable_icon' => ($this->is_enabled()) ? 'eye' : 'eye-slash',
+            'enabledisable_title' => ($this->is_enabled()) ? get_string('disable', 'block_plp') : get_string('enable', 'block_plp'),
+            'edit_url' => new moodle_url('/blocks/plp/config.php', [
+                'page' => 'plugins',
+                'action' => 'edit',
+                'id' => $this->get('id')
+            ]),
+            'delete_url' => new moodle_url('/blocks/plp/config.php', [
+                'page' => 'plugins',
+                'action' => 'delete',
+                'id' => $this->get('id'),
+                'sesskey' => sesskey()
+            ]),
+        ]);
+
+    }
 
     /**
      * Instantiate an instance of a plugin.
@@ -198,6 +280,40 @@ class plugin extends model {
         }
 
         return $plugin;
+
+    }
+
+    /**
+     * Return an array of all the core plugins found in the blocks/plp/classes/plugin/ directory.
+     * This returns only the name of the folder, not plugin objects.
+     * @return array
+     */
+    public static function get_core_plugins() : array {
+
+        global $CFG;
+
+        $results = array();
+        $dir = $CFG->dirroot . '/blocks/plp/classes/plugin';
+
+        $handle = opendir($dir);
+        if ($handle) {
+
+            // Loop through the /classes/plugin directory and look for plugins.
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry == '.' || $entry == '..' || !is_dir($dir . '/' . $entry)) {
+                    continue;
+                }
+                $results[$entry] = get_string('plugin:' . $entry . ':title', 'block_plp');
+            }
+
+        }
+
+        // Sort them by natural language.
+        usort($results, function($a, $b){
+            return strnatcasecmp($a, $b);
+        });
+
+        return $results;
 
     }
 

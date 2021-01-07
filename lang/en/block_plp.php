@@ -52,6 +52,9 @@ $string['title:core:config:mis:edit'] = 'Configuration - MIS Connections - Edit'
 $string['title:core:config:mis:enabledisable'] = $string['title:core:config:mis'];
 $string['title:core:config:mis:delete'] = $string['title:core:config:mis'];
 $string['title:core:config:settings'] = 'Configuration - General Settings';
+$string['title:core:config:plugins'] = 'Configuration - Plugins';
+$string['title:core:config:plugins:enabledisable'] = $string['title:core:config:plugins'];
+$string['title:core:config:plugins:delete'] = $string['title:core:config:plugins'];
 
 // General strings.
 $string['bottom'] = 'Bottom';
@@ -65,6 +68,7 @@ $string['creatednewrole'] = 'Created new Moodle role [%d] %s (%s) - %s';
 $string['delete:sure'] = 'Are you sure you want to delete <strong>{$a}</strong>?';
 $string['disable'] = 'Disable';
 $string['disabled'] = 'Disabled';
+$string['displayname'] = 'Display Name';
 
 $string['enable'] = 'Enable';
 $string['enabled'] = 'Enabled';
@@ -73,6 +77,8 @@ $string['environment'] = 'Environment';
 $string['generalsettings'] = 'General Settings';
 
 $string['home'] = 'Home';
+
+$string['install'] = 'Install';
 
 $string['left'] = 'Left';
 
@@ -91,11 +97,23 @@ $string['mis:type:oci'] = 'Oracle';
 $string['mis:type:pgsql'] = 'PostgreSQL';
 $string['mis:type:sqlsrv'] = 'Microsoft SQL Server';
 
+$string['path'] = 'Path';
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';
 $string['plpmanager'] = 'PLP Manager';
 $string['plpmanager:role:desc'] = 'This role should be used to define users with the permissions to see the PLP data of every student in the system. This role should be given the capability block/plp:view_any and all PLP Managers should be added to this role on the system context.';
+$string['plugin'] = 'Plugin';
+$string['plugin:core'] = 'Core Plugin';
+$string['plugin:custom'] = 'Create New Custom Plugin';
+$string['plugin:deleted'] = 'Plugin ({$a}) deleted';
+$string['plugin:external'] = 'External Plugin';
+$string['plugin:file'] = 'Plugin File';
+$string['plugin:import'] = 'Import Plugin From XML';
+$string['plugin:install:type'] = 'Type of plugin installation';
 $string['plugins'] = 'Plugins';
+$string['plugins:install'] = 'Install New Plugin(s)';
+$string['plugins:layouts'] = 'Manage Plugin Layouts';
+$string['plugins:manage'] = 'Manage Plugins';
 
 $string['notwriteable'] = 'Not Writeable';
 
@@ -132,7 +150,7 @@ $string['settings:role:tutor'] = '<strong>Personal Tutor Role</strong>';
 $string['settings:role:tutor:info'] = $string['settings:role:tutor'] . '<br>Which role in your system do you wish to use for Personal Tutor assignments?';
 
 
-
+$string['shortname'] = 'Short Name';
 $string['stats'] = 'Stats';
 $string['systeminfo'] = 'System Information';
 $string['system:moodleversion'] = 'Moodle Version';
@@ -140,6 +158,7 @@ $string['system:pluginversion'] = 'Plugin Version';
 $string['system:updatesavailable'] = 'Update(s) Available';
 $string['system:plugindataroot'] = 'Plugin Data Directory';
 
+$string['title'] = 'Title';
 $string['type'] = 'Type';
 
 $string['writeable'] = 'Writeable';

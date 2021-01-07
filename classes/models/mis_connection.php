@@ -180,8 +180,7 @@ class mis_connection extends model {
             'edit_url' => new moodle_url('/blocks/plp/config.php', [
                 'page' => 'mis',
                 'action' => 'edit',
-                'id' => $this->get('id'),
-                'sesskey' => sesskey()
+                'id' => $this->get('id')
             ]),
             'delete_url' => new moodle_url('/blocks/plp/config.php', [
                 'page' => 'mis',

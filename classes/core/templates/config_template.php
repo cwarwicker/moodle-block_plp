@@ -142,7 +142,7 @@ class config_template extends base_template {
      * Display the editing form for an MIS connection
      * @return bool
      */
-    public function action_mis_edit() {
+    public function action_mis_edit() : bool {
 
         $title = ($this->connection->exists()) ? $this->connection->get('name') : get_string('mis:newconnection', 'block_plp');
 
@@ -159,7 +159,7 @@ class config_template extends base_template {
      * Display the deletion confirmation screen for an MIS connection.
      * @return bool
      */
-    public function action_mis_delete() {
+    public function action_mis_delete() : bool {
 
         global $PAGE;
 
@@ -175,6 +175,49 @@ class config_template extends base_template {
             'confirmed' => 1
         ]), new moodle_url('/blocks/plp/config.php', [
             'page' => 'mis'
+        ])));
+
+        return true;
+
+    }
+
+    /**
+     * Method required in order for the plugins page to function.
+     * @return true
+     */
+    public function page_plugins() : bool {
+
+        global $PAGE;
+
+        // Render the default template for the MIS action.
+        $renderer = $PAGE->get_renderer('block_plp');
+        $this->add_var('plugins_selected', true);
+        $this->add_var('plugins', $renderer->plugins());
+        $this->add_var('form', $this->get_form()->render());
+        return true;
+
+    }
+
+    /**
+     * Display the deletion confirmation screen for a plugin.
+     * @return bool
+     */
+    public function action_plugins_delete() : bool {
+
+        global $PAGE;
+
+        $renderer = $PAGE->get_renderer('block_plp');
+
+        $this->set_specific_mustache_file('block_plp/generic');
+        $this->add_var('data', $renderer->render_confirm_delete($this->plugin->get('name'), new moodle_url
+        ('/blocks/plp/config.php', [
+            'page' => 'plugins',
+            'action' => 'delete',
+            'id' => $this->plugin->get('id'),
+            'sesskey' => sesskey(),
+            'confirmed' => 1
+        ]), new moodle_url('/blocks/plp/config.php', [
+            'page' => 'plugins'
         ])));
 
         return true;

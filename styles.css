@@ -266,9 +266,18 @@ div.block_plp-panel_heading {
     font-size: 14px;
 }
 
+div.block_plp-panel_heading.block_plp-blue {
+    background-color: #42abca;
+}
+
+div.block_plp-panel_heading.block_plp-red {
+    background-color: #ca4242;
+}
+
 div.block_plp-panel_body {
     padding: 15px;
     background-color: #f4f4f4;
+    margin-bottom: 10px;
 }
 
 div.block_plp-panel_body div.block_plp-panel_body {
