@@ -29,12 +29,14 @@ namespace block_plp\core\controllers;
 use block_plp\controller as base_controller;
 use block_plp\core\forms\install_plugin_form;
 use block_plp\core\forms\mis_connection_form;
+use block_plp\core\forms\plugin_form;
 use block_plp\core\forms\settings_form;
 use block_plp\models\mis_connection;
 use block_plp\models\plugin;
 use block_plp\plp;
 use block_plp\template;
 use core\notification;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -301,6 +303,69 @@ class config_controller extends base_controller {
             redirect($this->get_url());
 
         }
+
+        return true;
+
+    }
+
+    /**
+     * Alias for action_plugins_edit() to be used when creating a new plugin
+     * @return bool
+     */
+    public function action_plugins_new() : bool {
+        $this->set_action('edit');
+        $this->get_template()->set_action('edit');
+        return $this->action_plugins_edit();
+    }
+
+    /**
+     * Edit or create new plugin
+     * @return bool
+     * @throws \coding_exception
+     */
+    public function action_plugins_edit() : bool {
+
+        $id = optional_param('id', null, PARAM_INT);
+        $plugin = plugin::load($id);
+
+        // Load the new/edit plugin form.
+        $form = new plugin_form($this->get_template()->get_url());
+
+        if ($data = $form->get_data()) {
+
+            $plugin->set('name', $data->title);
+            $plugin->set('title', $data->title);
+            $plugin->set('enabled', (int)$data->enabled);
+
+            // If the plugin does not already exist in the database, then it must be custom.
+            if (!$plugin->exists()) {
+                $plugin->set('custom', 1);
+            }
+
+            // Loop through all the possible settings we could set and add/update any found in the form data.
+            foreach ($plugin->get_valid_settings() as $setting) {
+                if (isset($data->$setting)) {
+                    $plugin->add_setting($setting, $data->$setting);
+                }
+            }
+
+            // Save the plugin.
+            $plugin->save();
+
+            // Save the settings.
+            $plugin->save_settings();
+
+            // Update the hidden id field, in case we just saved a new plugin.
+            $form->change_value('id', $plugin->get('id'));
+
+            // Add a saved notification.
+            notification::success(get_string('plugin:saved', 'block_plp'));
+
+        }
+
+        // Pass the form object through to the template for rendering.
+        $this->get_template()->set_form($form);
+        $this->get_template()->plugin = $plugin;
 
         return true;
 

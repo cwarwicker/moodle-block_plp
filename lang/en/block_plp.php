@@ -30,6 +30,7 @@ $string['pluginname:my'] = 'My PLP';
 
 // Error messages.
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
+$string['error:colour'] = 'Colour must be a valid hex code.';
 $string['error:form:required'] = 'Field ({$a}) is required.';
 $string['error:invalidclassproperty'] = 'Property ({$a}) does not exist on this class.';
 $string['error:mis:connection'] = 'Unable to connect to external database.';
@@ -55,6 +56,8 @@ $string['title:core:config:settings'] = 'Configuration - General Settings';
 $string['title:core:config:plugins'] = 'Configuration - Plugins';
 $string['title:core:config:plugins:enabledisable'] = $string['title:core:config:plugins'];
 $string['title:core:config:plugins:delete'] = $string['title:core:config:plugins'];
+$string['title:core:config:plugins:edit'] = 'Edit Plugin';
+$string['title:core:config:plugins:new'] = 'New Plugin';
 
 // General strings.
 $string['bottom'] = 'Bottom';
@@ -97,19 +100,26 @@ $string['mis:type:oci'] = 'Oracle';
 $string['mis:type:pgsql'] = 'PostgreSQL';
 $string['mis:type:sqlsrv'] = 'Microsoft SQL Server';
 
+$string['page'] = 'Page';
+$string['pages'] = 'Pages';
 $string['path'] = 'Path';
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';
 $string['plpmanager'] = 'PLP Manager';
 $string['plpmanager:role:desc'] = 'This role should be used to define users with the permissions to see the PLP data of every student in the system. This role should be given the capability block/plp:view_any and all PLP Managers should be added to this role on the system context.';
 $string['plugin'] = 'Plugin';
+$string['plugin:colour:background'] = 'Header Background Colour';
+$string['plugin:colour:font'] = 'Header Font Colour';
 $string['plugin:core'] = 'Core Plugin';
 $string['plugin:custom'] = 'Create New Custom Plugin';
 $string['plugin:deleted'] = 'Plugin ({$a}) deleted';
+$string['plugin:edit'] = 'Edit Plugin';
 $string['plugin:external'] = 'External Plugin';
 $string['plugin:file'] = 'Plugin File';
 $string['plugin:import'] = 'Import Plugin From XML';
 $string['plugin:install:type'] = 'Type of plugin installation';
+$string['plugin:new'] = 'New Plugin';
+$string['plugin:saved'] = 'Plugin saved';
 $string['plugins'] = 'Plugins';
 $string['plugins:install'] = 'Install New Plugin(s)';
 $string['plugins:layouts'] = 'Manage Plugin Layouts';

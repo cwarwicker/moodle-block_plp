@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file holds the new_mis_connection_form class.
+ * This file holds the install_plugin_form class.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>
@@ -27,7 +27,6 @@ namespace block_plp\core\forms;
 
 use block_plp\models\plugin;
 use block_plp\moodle;
-use html_writer;
 use moodleform;
 
 defined('MOODLE_INTERNAL') or die();
@@ -35,7 +34,7 @@ defined('MOODLE_INTERNAL') or die();
 require_once($CFG->dirroot . '/lib/formslib.php');
 
 /**
- * This form allows the creation/editing of MIS connections to external databases.
+ * This form allows the form to select the type of plugin to install/create.
  *
  * @package     block_plp
  * @copyright   2020-onwards Conn Warwicker <conn@cmrwarwicker.com>

@@ -49,6 +49,12 @@ class plugin extends model {
     protected static $table = 'block_plp_plugins';
 
     /**
+     * Array of possible settings that the plugin can have.
+     * @var array
+     */
+    protected static $validsettings = ['background_colour', 'font_colour'];
+
+    /**
      * Name of the plugin
      * @var string
      */
@@ -68,15 +74,21 @@ class plugin extends model {
 
     /**
      * Version number of the plugin
-     * @var int
+     * @var int Default: 0 for a new custom plugin
      */
-    protected $version;
+    protected $version = 0;
 
     /**
      * Integer flag to show enabled status of the plugin
      * @var int
      */
     protected $enabled;
+
+    /**
+     * Integer flag to denote if the plugin is a custom-created one
+     * @var int
+     */
+    protected $custom;
 
     /**
      * Array of plugin settings
@@ -118,6 +130,26 @@ class plugin extends model {
      */
     public function uninstall() : bool {
         return false;
+    }
+
+    /**
+     * Return the array of valid settings which can be set against the plugin
+     * @return array
+     */
+    public function get_valid_settings() : array {
+        return static::$validsettings;
+    }
+
+    /**
+     * Add or update the value of a setting on the object.
+     * This does NOT save that data into the database, it only adds it to the object to be saved later.
+     * @param string $name Named setting
+     * @param mixed $value Value to set
+     * @return plugin
+     */
+    public function add_setting(string $name, $value) : plugin {
+        $this->settings[$name] = $value;
+        return $this;
     }
 
     /**
@@ -188,6 +220,21 @@ class plugin extends model {
         foreach ($records as $record) {
             $this->settings[$record->setting] = $record->value;
         }
+
+    }
+
+    /**
+     * Save all the settings into the database.
+     * @return void
+     */
+    public function save_settings() {
+
+        // Loop through all the settings on the plugin and save them.
+        // We don't need to include defaults here, because if the name is not in the settings array, then it hasn't changed.
+        foreach ($this->get_settings() as $name => $value) {
+            $this->update_setting($name, $value);
+        }
+
 
     }
 

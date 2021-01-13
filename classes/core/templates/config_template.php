@@ -224,4 +224,20 @@ class config_template extends base_template {
 
     }
 
+    /**
+     * Load the edit plugin form.
+     * @return bool
+     */
+    public function action_plugins_edit() : bool {
+
+        $title = ($this->plugin->exists()) ? get_string('plugin:edit', 'block_plp') . ' - ' . $this->plugin->get('title') :
+            get_string('plugin:new', 'block_plp');
+        $this->add_var('title', $title);
+        $this->add_var('plugins_selected', true);
+        $this->add_var('form', $this->get_form()->render());
+
+        return true;
+
+    }
+
 }

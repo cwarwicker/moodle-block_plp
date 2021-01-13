@@ -479,6 +479,23 @@ abstract class template {
 
     }
 
+    public function get_url(array $extraparams = null) : moodle_url {
+
+        $params = [];
+        $params['page'] = $this->get_page();
+        if ($this->has_action()) {
+            $params['action'] = $this->get_action();
+        }
+
+        // Add any extra params to the url.
+        if (!is_null($extraparams)) {
+            $params = $params + $extraparams;
+        }
+
+        return new moodle_url('/blocks/plp/' . $this->get_component_name() . '.php', $params);
+
+    }
+
     /**
      * See if there are any scripts to load for this page.
      * @return void
