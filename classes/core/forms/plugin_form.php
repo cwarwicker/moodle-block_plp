@@ -81,11 +81,32 @@ class plugin_form extends moodleform {
         $this->_form->addElement('header', 'pages', get_string('pages', 'block_plp'));
         $this->_form->setExpanded('pages', true);
 
+        // TODO: Pages.
+
+        // Permissions config.
+        $this->_form->addElement('header', 'permissions', get_string('permissions', 'block_plp'));
+        $this->_form->setExpanded('permissions', true);
+
+        // TODO: permissions.
+
+        // Scheduled task config.
+        $this->_form->addElement('header', 'tasks', get_string('tasks', 'block_plp'));
+        $this->_form->setExpanded('tasks', true);
+
+        // TODO: permissions.
+
+
+
         // Submit/Cancel buttons.
         $this->add_action_buttons();
 
-        // Default values.
-        $this->_form->setDefault('id', -1);
+        // Default values for the plugin.
+        $plugin = $this->_customdata;
+        $this->_form->setDefault('id', $plugin->get('id'));
+        $this->_form->setDefault('enabled', $plugin->get('enabled'));
+        $this->_form->setDefault('title', $plugin->get('title'));
+        $this->_form->setDefault('background_colour', $plugin->get_setting('background_colour'));
+        $this->_form->setDefault('font_colour', $plugin->get_setting('font_colour'));
 
     }
 

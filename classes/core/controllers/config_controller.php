@@ -36,7 +36,6 @@ use block_plp\models\plugin;
 use block_plp\plp;
 use block_plp\template;
 use core\notification;
-use moodle_url;
 
 defined('MOODLE_INTERNAL') or die();
 
@@ -329,7 +328,7 @@ class config_controller extends base_controller {
         $plugin = plugin::load($id);
 
         // Load the new/edit plugin form.
-        $form = new plugin_form($this->get_template()->get_url());
+        $form = new plugin_form($this->get_template()->get_url(), $plugin);
 
         if ($data = $form->get_data()) {
 

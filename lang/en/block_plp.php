@@ -129,6 +129,8 @@ $string['notwriteable'] = 'Not Writeable';
 
 $string['overview'] = 'Overview';
 
+$string['permissions'] = 'Permissions';
+
 $string['recentactivity'] = 'Recent Activity';
 
 $string['settings'] = 'Settings';
@@ -159,7 +161,6 @@ $string['settings:role:teacher:info'] = $string['settings:role:teacher'] . '<br>
 $string['settings:role:tutor'] = '<strong>Personal Tutor Role</strong>';
 $string['settings:role:tutor:info'] = $string['settings:role:tutor'] . '<br>Which role in your system do you wish to use for Personal Tutor assignments?';
 
-
 $string['shortname'] = 'Short Name';
 $string['stats'] = 'Stats';
 $string['systeminfo'] = 'System Information';
@@ -168,6 +169,7 @@ $string['system:pluginversion'] = 'Plugin Version';
 $string['system:updatesavailable'] = 'Update(s) Available';
 $string['system:plugindataroot'] = 'Plugin Data Directory';
 
+$string['tasks'] = 'Scheduled Tasks';
 $string['title'] = 'Title';
 $string['type'] = 'Type';
 

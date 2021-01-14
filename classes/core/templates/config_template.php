@@ -25,6 +25,7 @@
  */
 namespace block_plp\core\templates;
 
+use block_plp\helper;
 use block_plp\moodle;
 use block_plp\plp;
 use block_plp\template as base_template;
@@ -230,7 +231,7 @@ class config_template extends base_template {
      */
     public function action_plugins_edit() : bool {
 
-        $title = ($this->plugin->exists()) ? get_string('plugin:edit', 'block_plp') . ' - ' . $this->plugin->get('title') :
+        $title = ($this->plugin->exists()) ? get_string('plugin:edit', 'block_plp') . ' - ' . helper::out($this->plugin->get('title')) :
             get_string('plugin:new', 'block_plp');
         $this->add_var('title', $title);
         $this->add_var('plugins_selected', true);
