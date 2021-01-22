@@ -454,6 +454,9 @@ abstract class template {
             // Load any scripts required by this page.
             $this->load_scripts();
 
+            // Load any extra styles required.
+            $this->load_css();
+
             echo $OUTPUT->header();
 
             // There may not be a mustache file for the action we ran, in which case we will want to fall back to a default.
@@ -479,6 +482,11 @@ abstract class template {
 
     }
 
+    /**
+     * Get the URL of the template page.
+     * @param array|null $extraparams
+     * @return moodle_url
+     */
     public function get_url(array $extraparams = null) : moodle_url {
 
         $params = [];
@@ -500,13 +508,30 @@ abstract class template {
      * See if there are any scripts to load for this page.
      * @return void
      */
-    protected function load_scripts() {
+    protected function load_scripts() : void {
 
         global $CFG, $PAGE;
+
+        // Always load the core 'main' scripts.
+        $PAGE->requires->js_call_amd('block_plp/main', 'init');
 
         $path = $this->get_component() . '_' . $this->get_component_name() . '_' . $this->get_page();
         if (file_exists($CFG->dirroot . '/blocks/plp/amd/src/' . $path . '.js')) {
             $PAGE->requires->js_call_amd('block_plp/' . $path, 'init');
+        }
+
+    }
+
+    /**
+     * Load any stylesheets in the css directory
+     * @return void
+     */
+    protected function load_css() {
+
+        global $CFG, $PAGE;
+
+        foreach (glob($CFG->dirroot . '/blocks/plp/css/*.css') as $file) {
+            $PAGE->requires->css('/blocks/plp/css/' . basename($file));
         }
 
     }

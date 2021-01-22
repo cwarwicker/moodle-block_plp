@@ -190,23 +190,6 @@ abstract class connection {
     }
 
     /**
-     * Update a record in the external database
-     * @param string $table Table name
-     * @param array $conditions Where clauses to find the correct record to update
-     * @param array $data Array of fields => values to change
-     * @return bool
-     */
-    public abstract function update(string $table, array $conditions, array $data) : bool;
-
-    /**
-     * Insert a new record into the external database
-     * @param string $table Table name
-     * @param array $data Array of fields => values to insert
-     * @return int ID of inserted record
-     */
-    public abstract function insert(string $table, array $data) : int;
-
-    /**
      * Given a string 'type' of database, return an instantiated connection object, connected to the database.
      * @param string $type E.g. 'mysql', 'mariadb', 'pgsql', etc...
      * @param string $host

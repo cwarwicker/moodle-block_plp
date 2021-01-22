@@ -1,0 +1,20 @@
+<table class="table table-bordered block_plp-table">
+    <thead class="thead-dark">
+        <tr>
+            <th></th>
+            {{#options.columns}}
+                <th scope="col">{{col_name}}</th>
+            {{/options.columns}}
+        </tr>
+    </thead>
+    <tbody>
+        {{#options.rows}}
+            <tr>
+                <th scope="col">{{row_name}}</th>
+                {{#options.columns}}
+                    <td><input type="radio" class="form-check-input" name="{{elementname}}[{{row_id}}]" value="{{col_id}}" /></td>
+                {{/options.columns}}
+            </tr>
+        {{/options.rows}}
+    </tbody>
+</table>

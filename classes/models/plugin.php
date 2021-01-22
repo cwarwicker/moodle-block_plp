@@ -44,18 +44,16 @@ class plugin extends model {
 
     /**
      * Plugin model uses the mdl_block_plp_plugins table.
-     * @var string
      */
-    protected static $table = 'block_plp_plugins';
+    const TABLE = 'block_plp_plugins';
 
     /**
      * Array of possible settings that the plugin can have.
-     * @var array
      */
-    protected static $validsettings = ['background_colour', 'font_colour'];
+    const VALID_SETTINGS = ['background_colour', 'font_colour'];
 
     /**
-     * Name of the plugin
+     * Unique name of the plugin
      * @var string
      */
     protected $name;
@@ -88,7 +86,7 @@ class plugin extends model {
      * Integer flag to denote if the plugin is a custom-created one
      * @var int
      */
-    protected $custom;
+    protected $custom = 0;
 
     /**
      * Array of plugin settings
@@ -109,11 +107,55 @@ class plugin extends model {
     protected $user;
 
     /**
+     * Array of pages within this plugin
+     * @var plugin_page[]
+     */
+    protected $pages;
+
+    /**
      * Check if the plugin is enabled
      * @return bool
      */
     public function is_enabled() : bool {
         return ($this->enabled == 1);
+    }
+
+    /**
+     * Get the array of pages on this plugin.
+     * @return array
+     */
+    public function get_pages() : array {
+
+        if (!$this->pages) {
+            $this->load_pages();
+        }
+
+        return $this->pages;
+
+    }
+
+    /**
+     * Load the pages on this plugin into the pages array
+     * @return void
+     */
+    protected function load_pages() : void {
+        $this->pages = plugin_page::all(['pluginid' => $this->id]);
+    }
+
+    /**
+     * Overwrite the standard ORM mapping and create plugin_page objects to be stored in the pages array
+     * @param array $pages
+     * @return void
+     */
+    public function map_pages(array $pages) : void {
+
+        // If we are mapping, we must assume that we are starting from scratch. So clear any existing fields from the array.
+        $this->pages = [];
+
+        foreach ($pages as $pagedata) {
+            $this->pages[] = plugin_page::from_array($pagedata);
+        }
+
     }
 
     /**
@@ -133,11 +175,35 @@ class plugin extends model {
     }
 
     /**
+     * Save the plugin.
+     * @return bool
+     */
+    public function save() : bool {
+
+        // Save the plugin first.
+        if (!parent::save()) {
+            return false;
+        }
+
+        // Store a result variable so we can return false if anything beneath us fails.
+        $result = true;
+
+        // Now we should have the object id (if the record was new) and we can use it to save the fields.
+        foreach ($this->pages as $page) {
+            $page->set('pluginid', $this->id);
+            $result = $result && $page->save();
+        }
+
+        return $result;
+
+    }
+
+    /**
      * Return the array of valid settings which can be set against the plugin
      * @return array
      */
     public function get_valid_settings() : array {
-        return static::$validsettings;
+        return static::VALID_SETTINGS;
     }
 
     /**
@@ -234,7 +300,6 @@ class plugin extends model {
         foreach ($this->get_settings() as $name => $value) {
             $this->update_setting($name, $value);
         }
-
 
     }
 
@@ -342,7 +407,7 @@ class plugin extends model {
         $results = array();
         $dir = $CFG->dirroot . '/blocks/plp/classes/plugin';
 
-        $handle = opendir($dir);
+        $handle = @opendir($dir);
         if ($handle) {
 
             // Loop through the /classes/plugin directory and look for plugins.

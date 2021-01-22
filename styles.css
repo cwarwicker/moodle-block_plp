@@ -215,6 +215,58 @@ div.block_plp-mis_connection_result {
     margin-top: 10px;
 }
 
+ul#block_plp-plugin_pages,
+ul#block_plp-plugin_pages ul {
+    list-style: none;
+}
+
+/* Overwrite styles that are applied to ui-sortable lists */
+ul#block_plp-plugin_pages.ui-sortable {
+    background: none;
+    margin-left: 0;
+    margin-bottom: 1rem;
+}
+
+ul#block_plp-plugin_pages.ui-sortable li {
+    cursor: default;
+    margin-bottom: 5px;
+    height: auto;
+}
+
+ul#block_plp-plugin_pages.ui-sortable li span {
+    position: inherit;
+    margin: 0;
+}
+
+ul#block_plp-plugin_pages li.ui-sortable-placeholder {
+    border: 1px solid #dad55e;
+    background: #fffa90;
+    color: #777620;
+    height: 1.5em;
+    line-height: 1.2em;
+}
+
+a.block_plp-plugin_page_handle {
+    cursor: move;
+}
+
+div.block_plp-section {
+    margin-bottom: 2rem;
+}
+
+div.block_plp-section-heading {
+    color: #c90171;
+    font-size: 1.75rem;
+}
+
+div.block_plp-section-buttons {
+    margin-bottom: 2rem;
+    margin-top: 0.5rem;
+}
+
+div.block_plp-form-group > label {
+    font-weight: bold;
+}
 
 /**
  * General, repeatable styles used across a multitude of pages.
@@ -316,4 +368,18 @@ a.block_plp-icon:visited {
 
 a.block_plp-action {
     margin: 0 5px;
+}
+
+input.block_plp-datepicker {
+    width: 30%;
+}
+
+table.block_plp-table {
+    text-align: center;
+    vertical-align: middle;
+}
+
+table.block_plp-table input.form-check-input {
+    margin-left: 0;
+    margin-right: 0;
 }

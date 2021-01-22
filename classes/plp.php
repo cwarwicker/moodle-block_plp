@@ -64,6 +64,7 @@ class plp {
         'email_alerts_enabled' => '1',
         'role_student' => '5',
         'role_teacher' => '3,4',
+        'course_display_format' => '[%short%] %full%'
     ];
 
     /**

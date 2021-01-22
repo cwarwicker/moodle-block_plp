@@ -266,6 +266,9 @@ class config_controller extends base_controller {
             ['name' => 'id', 'type' => PARAM_INT]
         ]);
 
+        // Form needs to be loaded into the template as the page_plugins method won't be run but same template loaded.
+        $this->get_template()->set_form(new install_plugin_form());
+
         $plugin = plugin::load($params['id']);
         if ($plugin->exists() && confirm_sesskey()) {
             $plugin->toggle_enabled();
@@ -291,7 +294,7 @@ class config_controller extends base_controller {
         $this->get_template()->plugin = $plugin;
 
         // If it's confirmed, run the delete.
-        if ($params['confirmed']) {
+        if ($plugin->exists () && $params['confirmed']) {
 
             // Delete the MIS connection and print the success notification.
             $plugin->delete();

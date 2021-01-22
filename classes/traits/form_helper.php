@@ -48,7 +48,7 @@ trait form_helper {
      * This method can be used after you've already run get_data(), if you want to then change the value which is displayed back in
      * the form. For example, changing the id field if you just created a record and want the 'new' form to become an 'edit' form.
      * @param string $field
-     * @param $value
+     * @param mixed $value
      * @return void
      */
     public function change_value(string $field, $value) {

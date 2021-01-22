@@ -44,9 +44,9 @@ abstract class model {
 
     /**
      * Name of the database table this object is loaded from.
-     * @var string
+     * Please overwrite this in the model classes.
      */
-    protected static $table = '';
+    const TABLE = '';
 
     /**
      * Construct the model and try to load it from the database.

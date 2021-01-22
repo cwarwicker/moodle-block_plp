@@ -49,9 +49,8 @@ class user extends model {
 
     /**
      * User model uses the mdl_user table.
-     * @var string
      */
-    protected static $table = 'user';
+    const TABLE = 'user';
 
     /**
      * User's username
@@ -122,7 +121,7 @@ class user extends model {
 
         }
 
-        return $DB->get_records_sql("SELECT DISTINCT c.*
+        $records = $DB->get_records_sql("SELECT DISTINCT c.id
                                               FROM {course} c
                                               JOIN {course_categories} cc ON cc.id = c.category
                                               JOIN {context} x ON x.instanceid = c.id
@@ -132,6 +131,13 @@ class user extends model {
                                               AND ra.userid = :userid
                                               {$extrasql}
                                               ORDER BY c.shortname ASC", $params);
+
+        $courses = [];
+        foreach ($records as $record) {
+            $courses[$record->id] = new course($record->id);
+        }
+
+        return $courses;
 
     }
 
@@ -168,7 +174,7 @@ class user extends model {
         $studentcourses = $student->get_courses($plp->get_roles('student'));
         foreach ($studentcourses as $course) {
             // Does our current user have the view capability on this course context?
-            $context = context_course::instance($course->id);
+            $context = $course->get_context();
             if (has_capability($capabilities['view'], $context, $this->get('id'))) {
                 $contexts[] = $context;
             }

@@ -54,9 +54,8 @@ class mis_connection extends model {
 
     /**
      * This table will be used to find records of this object type.
-     * @var string
      */
-    protected static $table = 'block_plp_mis_connections';
+    const TABLE = 'block_plp_mis_connections';
 
     /**
      * Connection name
