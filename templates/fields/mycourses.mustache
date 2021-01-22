@@ -1,0 +1,6 @@
+<select class="form-control" id="{{elementid}}" name="{{elementname}}">
+    <option value="0">{{#str}} pleasechoose, block_plp {{/str}}</option>
+    {{#courses}}
+        <option value="{{id}}" {{#selected}}selected="true"{{/selected}} >{{name}}</option>
+    {{/courses}}
+</select>

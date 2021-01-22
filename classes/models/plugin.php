@@ -27,6 +27,8 @@ namespace block_plp\models;
 
 use block_plp\model;
 use block_plp\plp;
+use block_plp\traits\permissions;
+use block_plp\traits\settings;
 use moodle_url;
 
 defined('MOODLE_INTERNAL') or die();
@@ -42,20 +44,58 @@ defined('MOODLE_INTERNAL') or die();
  */
 class plugin extends model {
 
+    // Use the permissions trait, so we can check PLP role permissions on the plugin.
+    use permissions;
+
+    // Use the settings table trait.
+    use settings;
+
     /**
      * Plugin model uses the mdl_block_plp_plugins table.
-     * @var string
      */
-    protected static $table = 'block_plp_plugins';
+    const TABLE = 'block_plp_plugins';
 
     /**
      * Array of possible settings that the plugin can have.
-     * @var array
      */
-    protected static $validsettings = ['background_colour', 'font_colour'];
+    const VALID_SETTINGS = ['background_colour', 'font_colour'];
 
     /**
-     * Name of the plugin
+     * Table where the plugin settings are stored.
+     */
+    const SETTINGS_TABLE = 'block_plp_plugin_settings';
+
+    /**
+     * Field to reference a particular plugin in the settings table.
+     */
+    const SETTINGS_FIELD = 'pluginid';
+
+    /**
+     * Array of default PLP role permissions to be inserted when a new plugin is created.
+     */
+    const DEFAULT_PERMISSIONS = [
+
+        // User on their own PLP can edit/delete any data they create, but it is up to the institution to define which ones
+        // they can 'add' the data to in the first place.
+        'user' => ['add' => false, 'edit_own' => true, 'edit_any' => false, 'delete_own' => true, 'delete_any' => false],
+
+        // Teachers and tutors by default can add, edit and delete anything on the PLP of any student they have access to.
+        'teacher' => ['add' => true, 'edit_own' => true, 'edit_any' => true, 'delete_own' => true, 'delete_any' => true],
+        'tutor' => ['add' => true, 'edit_own' => true, 'edit_any' => true, 'delete_own' => true, 'delete_any' => true],
+
+        // Managers by default don't have any editing access, as they are most likely from a Quality/Reporting area who just
+        // need to see the data.
+        'manager' => ['add' => false, 'edit_own' => false, 'edit_any' => false, 'delete_own' => false, 'delete_any' => false],
+
+    ];
+
+    /**
+     * The string used to identify which permission records are associated with a plugin.
+     */
+    const PERMISSION_REF = 'plugin';
+
+    /**
+     * Unique name of the plugin
      * @var string
      */
     protected $name;
@@ -88,25 +128,13 @@ class plugin extends model {
      * Integer flag to denote if the plugin is a custom-created one
      * @var int
      */
-    protected $custom;
+    protected $custom = 0;
 
     /**
-     * Array of plugin settings
-     * @var array
+     * Array of pages within this plugin
+     * @var plugin_page[]
      */
-    protected $settings = [];
-
-    /**
-     * Array of default values for the plugin settings
-     * @var array
-     */
-    protected $defaultsettings = [];
-
-    /**
-     * User that is loaded into the plugin
-     * @var user
-     */
-    protected $user;
+    protected $pages;
 
     /**
      * Check if the plugin is enabled
@@ -114,6 +142,44 @@ class plugin extends model {
      */
     public function is_enabled() : bool {
         return ($this->enabled == 1);
+    }
+
+    /**
+     * Get the array of pages on this plugin.
+     * @return array
+     */
+    public function get_pages() : array {
+
+        if (!$this->pages) {
+            $this->load_pages();
+        }
+
+        return $this->pages;
+
+    }
+
+    /**
+     * Load the pages on this plugin into the pages array
+     * @return void
+     */
+    protected function load_pages() : void {
+        $this->pages = plugin_page::all(['pluginid' => $this->id]);
+    }
+
+    /**
+     * Overwrite the standard ORM mapping and create plugin_page objects to be stored in the pages array
+     * @param array $pages
+     * @return void
+     */
+    public function map_pages(array $pages) : void {
+
+        // If we are mapping, we must assume that we are starting from scratch. So clear any existing fields from the array.
+        $this->pages = [];
+
+        foreach ($pages as $pagedata) {
+            $this->pages[] = plugin_page::from_array($pagedata);
+        }
+
     }
 
     /**
@@ -133,127 +199,35 @@ class plugin extends model {
     }
 
     /**
+     * Save the plugin.
+     * @return bool
+     */
+    public function save() : bool {
+
+        // Save the plugin first.
+        if (!parent::save()) {
+            return false;
+        }
+
+        // Store a result variable so we can return false if anything beneath us fails.
+        $result = true;
+
+        // Now we should have the object id (if the record was new) and we can use it to save the fields.
+        foreach ($this->pages as $page) {
+            $page->set('pluginid', $this->id);
+            $result = $result && $page->save();
+        }
+
+        return $result;
+
+    }
+
+    /**
      * Return the array of valid settings which can be set against the plugin
      * @return array
      */
     public function get_valid_settings() : array {
-        return static::$validsettings;
-    }
-
-    /**
-     * Add or update the value of a setting on the object.
-     * This does NOT save that data into the database, it only adds it to the object to be saved later.
-     * @param string $name Named setting
-     * @param mixed $value Value to set
-     * @return plugin
-     */
-    public function add_setting(string $name, $value) : plugin {
-        $this->settings[$name] = $value;
-        return $this;
-    }
-
-    /**
-     * Get all of the plugin's settings.
-     * @param bool $includedefaults Should we include default values if none are found for those keys?
-     * @return array
-     */
-    public function get_settings($includedefaults = false) : array {
-
-        if (!$this->settings) {
-            $this->load_settings();
-        }
-
-        $settings = $this->settings;
-
-        // If we want to include the defaults, add those in if they are missing from the database.
-        if ($includedefaults) {
-            foreach ($this->defaultsettings as $default => $value) {
-                if (!array_key_exists($default, $settings)) {
-                    $settings[$default] = $value;
-                }
-            }
-        }
-
-        return $settings;
-
-    }
-
-    /**
-     * Get the value of a setting for this plugin.
-     * @param string $name Name of the setting to get the value of
-     * @return mixed
-     */
-    public function get_setting(string $name) {
-
-        // If we have already loaded the settings and we can find this in the settings array, retrieve it from there.
-        if (array_key_exists($name, $this->settings)) {
-            return $this->settings[$name];
-        }
-
-        // Otherwise, load all the settings and then try and find it.
-        $this->load_settings();
-
-        $value = ($this->settings[$name]) ?? null;
-
-        // If the value is still null, see if we have a default for this setting.
-        if (is_null($value) && array_key_exists($name, $this->defaultsettings)) {
-            $value = $this->defaultsettings[$name];
-        }
-
-        return $value;
-
-    }
-
-    /**
-     * Load all of the plugin's settings into the settings array.
-     * @return void
-     */
-    protected function load_settings() {
-
-        global $DB;
-
-        // Reset settings array.
-        $this->settings = [];
-
-        // Get all of the records from the settings table where the userid and pluginid are null - meaning they are system settings.
-        $records = $DB->get_records('block_plp_settings', ['userid' => null, 'pluginid' => $this->id]);
-        foreach ($records as $record) {
-            $this->settings[$record->setting] = $record->value;
-        }
-
-    }
-
-    /**
-     * Save all the settings into the database.
-     * @return void
-     */
-    public function save_settings() {
-
-        // Loop through all the settings on the plugin and save them.
-        // We don't need to include defaults here, because if the name is not in the settings array, then it hasn't changed.
-        foreach ($this->get_settings() as $name => $value) {
-            $this->update_setting($name, $value);
-        }
-
-
-    }
-
-    /**
-     * Update or insert a setting value for the plugin
-     * @param string $name Named setting
-     * @param mixed $value Value to set
-     * @return bool|int
-     */
-    public function update_setting(string $name, $value) {
-
-        // We can only update the setting, if the plugin exists.
-        if (!$this->exists()) {
-            return false;
-        }
-
-        $plp = new plp();
-        return $plp->update_setting($name, $value, $this->id);
-
+        return static::VALID_SETTINGS;
     }
 
     /**
@@ -262,14 +236,6 @@ class plugin extends model {
     public function toggle_enabled() {
         $this->set('enabled', !$this->get('enabled'));
         return $this->save();
-    }
-
-    /**
-     * Get the user who has been loaded into the plugin
-     * @return user|null
-     */
-    protected function get_user() : ?user {
-        return $this->user;
     }
 
     /**
@@ -342,7 +308,7 @@ class plugin extends model {
         $results = array();
         $dir = $CFG->dirroot . '/blocks/plp/classes/plugin';
 
-        $handle = opendir($dir);
+        $handle = @opendir($dir);
         if ($handle) {
 
             // Loop through the /classes/plugin directory and look for plugins.

@@ -31,6 +31,7 @@ use block_plp\core\forms\install_plugin_form;
 use block_plp\core\forms\mis_connection_form;
 use block_plp\core\forms\plugin_form;
 use block_plp\core\forms\settings_form;
+use block_plp\helper;
 use block_plp\models\mis_connection;
 use block_plp\models\plugin;
 use block_plp\plp;
@@ -58,17 +59,37 @@ class config_controller extends base_controller {
 
         $form = new settings_form();
 
+        // Process any saved files into their filemanagers.
+        $context = \context_system::instance();
+
+        // Logo image upload.
+        $data = new \stdClass();
+        $data = file_prepare_standard_filemanager($data, 'logo', settings_form::FILEMANAGER_OPTIONS['logo'], $context,
+            'block_plp', settings_form::FILEMANAGER_AREA, settings_form::FILEMANAGER_ITEMS['logo']);
+
+        // Apply prepared filemanagers to form.
+        $form->set_data($data);
+
         // If the form is submitted.
         if ($data = $form->get_data()) {
 
             $plp = new plp();
 
+            // Process file uploads.
+            if ($data->logo_filemanager) {
+
+                // Save the uploaded logo file.
+                file_postupdate_standard_filemanager($data, 'logo', settings_form::FILEMANAGER_OPTIONS['logo'], $context,
+                    'block_plp', settings_form::FILEMANAGER_AREA, settings_form::FILEMANAGER_ITEMS['logo']);
+
+            }
+
             // Update settings.
             $plp->update_setting('layout', $data->layout);
             $plp->update_setting('dock', $data->dock);
-            $plp->update_setting('logo', $data->logo);
             $plp->update_setting('category_usage', $data->category_usage);
             $plp->update_setting('categories', $data->categories);
+            $plp->update_setting('course_display_format', $data->course_display_format);
             $plp->update_setting('academic_year_enabled', $data->academic_year_enabled);
             $plp->update_setting('academic_year', $data->academic_year);
             $plp->update_setting('email_alerts_enabled', $data->email_alerts_enabled);
@@ -76,6 +97,12 @@ class config_controller extends base_controller {
             $plp->update_setting('role_teacher', $data->role_teacher);
             $plp->update_setting('role_tutor', $data->role_tutor);
             $plp->update_setting('role_manager', $data->role_manager);
+
+            // Get the uploaded file for the logo and save the mdl_file id.
+            $logo = helper::get_uploaded_file($context->id, 'block_plp', settings_form::FILEMANAGER_AREA,
+                file_get_submitted_draft_itemid('logo'));
+
+            $plp->update_setting('logo', $logo);
 
             notification::success(get_string('configsaved', 'block_plp'));
 
@@ -266,6 +293,9 @@ class config_controller extends base_controller {
             ['name' => 'id', 'type' => PARAM_INT]
         ]);
 
+        // Form needs to be loaded into the template as the page_plugins method won't be run but same template loaded.
+        $this->get_template()->set_form(new install_plugin_form());
+
         $plugin = plugin::load($params['id']);
         if ($plugin->exists() && confirm_sesskey()) {
             $plugin->toggle_enabled();
@@ -291,7 +321,7 @@ class config_controller extends base_controller {
         $this->get_template()->plugin = $plugin;
 
         // If it's confirmed, run the delete.
-        if ($params['confirmed']) {
+        if ($plugin->exists () && $params['confirmed']) {
 
             // Delete the MIS connection and print the success notification.
             $plugin->delete();

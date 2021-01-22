@@ -1,6 +1,3 @@
-/**
- * Config styles.
- */
 div.block_plp-config {
     width: 100%;
     margin: auto;
@@ -215,10 +212,72 @@ div.block_plp-mis_connection_result {
     margin-top: 10px;
 }
 
+ul#block_plp-plugin_pages,
+ul#block_plp-plugin_pages ul {
+    list-style: none;
+}
 
-/**
- * General, repeatable styles used across a multitude of pages.
- */
+/* Overwrite styles that are applied to ui-sortable lists */
+ul#block_plp-plugin_pages.ui-sortable {
+    background: none;
+    margin-left: 0;
+    margin-bottom: 1rem;
+}
+
+ul#block_plp-plugin_pages.ui-sortable li {
+    cursor: default;
+    margin-bottom: 5px;
+    height: auto;
+}
+
+ul#block_plp-plugin_pages.ui-sortable li span {
+    position: inherit;
+    margin: 0;
+}
+
+ul#block_plp-plugin_pages li.ui-sortable-placeholder {
+    border: 1px solid #dad55e;
+    background: #fffa90;
+    color: #777620;
+    height: 1.5em;
+    line-height: 1.2em;
+}
+
+a.block_plp-plugin_page_handle {
+    cursor: move;
+}
+
+div.block_plp-section {
+    margin-bottom: 2rem;
+}
+
+div.block_plp-section-heading {
+    color: #c90171;
+    font-size: 1.75rem;
+}
+
+div.block_plp-section-buttons {
+    margin-bottom: 2rem;
+    margin-top: 0.5rem;
+}
+
+div.block_plp-edit {
+    display: none;
+}
+
+div.block_plp-edit label.block_plp-field-label {
+    font-weight: bold;
+}
+
+div.block_plp-section_db_single {
+    margin-bottom: 1em;
+}
+
+div.block_plp-section_db_single label.block_plp-field-label {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
 .block_plp-centre {
     text-align: center;
 }
@@ -316,4 +375,79 @@ a.block_plp-icon:visited {
 
 a.block_plp-action {
     margin: 0 5px;
+}
+
+input.block_plp-datepicker {
+    width: 30%;
+}
+
+input.block_plp-datepicker.form-control[readonly] {
+    background: inherit;
+}
+
+table.block_plp-table {
+    text-align: center;
+    vertical-align: middle;
+}
+
+table.block_plp-table input.form-check-input {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.block_plp-hidden {
+    display: none;
+}
+
+div.block_plp-item {
+    background-color: #EDEDED;
+    width: 90%;
+    margin: auto auto 5px;
+    border: 1px solid #E1E1E1;
+    padding: 10px 30px;
+}
+
+div.block_plp-item:hover {
+    background-color: #F7F7F7;
+}
+
+div.block_plp-item-header {
+    cursor: pointer;
+}
+
+span.block_plp-item-title {
+    color: #4782B5;
+    font-weight: bold;
+    display: block;
+}
+
+span.block_plp-item-set {
+    font-size: 10pt;
+    display: block;
+}
+
+div.block_plp-item-links {
+    text-align: center;
+}
+
+div.block_plp-item-links a {
+    margin: auto 10px;
+}
+
+div.block_plp-item-links div {
+    margin-bottom: 1em;
+}
+
+div.block_plp-item-content {
+    display: none;
+    padding-top: 20px;
+}
+
+div.block_plp-frozen-table {
+    min-height: 250px;
+    max-height: 600px;
+}
+
+div.block_plp-edit_item {
+    margin: 20px auto;
 }

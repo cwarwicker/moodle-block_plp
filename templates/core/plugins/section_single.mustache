@@ -1,0 +1,17 @@
+<div class="block_plp-section-buttons">
+    <a href="#" class="btn btn-primary block_plp-toggle-edit block_plp-section-{{id}}-edit" data-id="{{id}}">{{#str}}new{{/str}}</a>
+    <a href="#" class="btn btn-default block_plp-toggle-edit block_plp-section-{{id}}-view" style="display:none;"
+       data-id="{{id}}">{{#str}}cancel{{/str}}</a>
+    <a href="#" class="btn btn-success block_plp-section-{{id}}-view block_plp-save" style="display:none;"
+       data-id="{{id}}">{{#str}}save{{/str}}</a>
+</div>
+
+<!-- If this section has fields, loop through them and print the editing and viewing HTML for them -->
+{{#fields}}
+    <div class="block_plp-edit block_plp-section-{{id}}-edit">
+        {{{edit}}}
+    </div>
+    <div class="block_plp-section-{{id}}-view">
+        {{{value}}}
+    </div>
+{{/fields}}

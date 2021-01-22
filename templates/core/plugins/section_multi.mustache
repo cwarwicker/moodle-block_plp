@@ -1,0 +1,47 @@
+<!-- Now the items -->
+{{#items}}
+    <form class="block_plp-form">
+        <div class="block_plp-item">
+            <div class="block_plp-item-header">
+                <span class="block_plp-item-title">{{title}}</span>
+                <span class="block_plp-item-set">{{#str}}setby, block_plp{{/str}} {{setbyuser}}, {{settime}}</span>
+            </div>
+            <div class="block_plp-item-content">
+                <!-- Action links -->
+                <div class="block_plp-item-links">
+                    <div>
+                        {{#can_edit}}
+                            <a href="#" class="block_plp-toggle-edit" data-id="{{sectionid}}-item-{{id}}">{{#pix}}t/editstring, core, {{#str}}edit, core{{/str}}{{/pix}}{{#str}}edit,
+                                core{{/str}}</a>
+                        {{/can_edit}}
+                        {{#can_delete}}
+                            <a href="#" class="">{{#pix}}t/delete, core, {{#str}}delete, core{{/str}}{{/pix}}{{#str}}delete, core{{/str}}</a>
+                        {{/can_delete}}
+                        <a href="#" class="">{{#pix}}t/print, core, {{#str}}print, block_plp{{/str}}{{/pix}}{{#str}}print, block_plp{{/str}}</a>
+                    </div>
+                    <div class="block_plp-centre">
+                        <button class="btn btn-success" data-itemid="{{id}}">{{#str}}save, core{{/str}}</button>
+                    </div>
+                </div>
+                <div class="block_plp-item-content-main">
+                    <!-- If this section has fields, loop through them and print the editing and viewing HTML for them -->
+                    {{#fields}}
+                        <div class="block_plp-section-{{sectionid}}-item-{{id}}-view">
+                            {{{value}}}
+                        </div>
+                        {{#can_edit}}
+                            <div class="block_plp-edit block_plp-edit_item block_plp-section-{{sectionid}}-item-{{id}}-edit">
+                                {{{edit}}}
+                            </div>
+                        {{/can_edit}}
+                    {{/fields}}
+
+                    <div class="block_plp-centre">
+                        <button class="btn btn-success" data-itemid="{{id}}">{{#str}}save, core{{/str}}</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+{{/items}}

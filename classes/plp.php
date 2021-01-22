@@ -25,6 +25,7 @@
  */
 namespace block_plp;
 
+use block_plp\traits\settings;
 use stdClass;
 
 defined('MOODLE_INTERNAL') or die();
@@ -40,17 +41,25 @@ defined('MOODLE_INTERNAL') or die();
  */
 class plp {
 
+    // Use the settings table trait.
+    use settings;
+
+    /**
+     * Table the settings are stored in.
+     * @var string
+     */
+    const SETTINGS_TABLE = 'block_plp_settings';
+
+    /**
+     * We do not need a field for these settings, but we need the constant for the trait.
+     */
+    const SETTINGS_FIELD = false;
+
     /**
      * Path to the directory within the site's dataroot for storing files.
      * @var string
      */
     protected $dataroot;
-
-    /**
-     * Array of plugin configuration settings.
-     * @var array
-     */
-    protected $settings = [];
 
     /**
      * Default values for some of the configuration settings, to use if there is no value defined.
@@ -64,6 +73,7 @@ class plp {
         'email_alerts_enabled' => '1',
         'role_student' => '5',
         'role_teacher' => '3,4',
+        'course_display_format' => '[{{short}}] {{full}}'
     ];
 
     /**
@@ -117,96 +127,6 @@ class plp {
     }
 
     /**
-     * Get a named configuration setting
-     * @param string $name
-     * @return string|null
-     */
-    public function get_setting(string $name) : ?string {
-
-        // If we have already loaded the settings and we can find this in the settings array, retrieve it from there.
-        if (array_key_exists($name, $this->settings)) {
-            return $this->settings[$name];
-        }
-
-        // Otherwise, load all the settings and then try and find it.
-        $this->load_settings();
-
-        $value = ($this->settings[$name]) ?? null;
-
-        // If the value is still null, see if we have a default for this setting.
-        if (is_null($value) && array_key_exists($name, $this->defaultsettings)) {
-            $value = $this->defaultsettings[$name];
-        }
-
-        return $value;
-
-    }
-
-    /**
-     * Load all of the PLP's configuration settings into the settings array.
-     * @return void
-     */
-    protected function load_settings() {
-
-        global $DB;
-
-        // Reset settings array.
-        $this->settings = [];
-
-        // Get all of the records from the settings table where the userid and pluginid are null - meaning they are system settings.
-        $records = $DB->get_records('block_plp_settings', ['userid' => null, 'pluginid' => null]);
-        foreach ($records as $record) {
-            $this->settings[$record->setting] = $record->value;
-        }
-
-    }
-
-    /**
-     * Update or insert a setting value for the PLP system.
-     * @param string $name Named setting
-     * @param mixed $value Value to set
-     * @param int|null $pluginid (Optional) Plugin ID that the setting is related to.
-     * @param int|null $userid (Optional) User ID that the setting is related to.
-     * @return bool|int
-     */
-    public function update_setting(string $name, $value, int $pluginid = null, int $userid = null) {
-
-        global $DB;
-
-        // Fix the value so it can be inserted into a database column.
-        // If it's an array, just get the values in a comma-separated list.
-        if (is_array($value)) {
-            $value = implode(',', $value);
-        }
-
-        // If it's still not scalar, just encode it.
-        if (!is_scalar($value) && !is_null($value)) {
-            $value = json_encode($value);
-        }
-
-        $obj = [];
-        $obj['userid'] = $userid;
-        $obj['pluginid'] = $pluginid;
-        $obj['setting'] = $name;
-
-        // If the value is null or empty, that means we are basically deleting the setting, so let's actually delete it.
-        if (is_null($value) || strlen($value) == 0) {
-            return $DB->delete_records('block_plp_settings', $obj);
-        }
-
-        // Does the setting already exist?
-        $setting = $DB->get_record('block_plp_settings', $obj);
-        if ($setting) {
-            $setting->value = $value;
-            return $DB->update_record('block_plp_settings', $setting);
-        } else {
-            $obj['value'] = $value;
-            return $DB->insert_record('block_plp_settings', $obj);
-        }
-
-    }
-
-    /**
      * Get the role IDs configured for a particular named role within the PLP.
      * @param string $name E.g. 'tutor', 'student', 'teacher', or 'manager'.
      * @return array
@@ -221,12 +141,9 @@ class plp {
         }
 
         $setting = $this->get_setting('role_' . $name);
-        if (is_null($setting)) {
+        if (is_null($setting) || empty($setting)) {
             return null;
         }
-
-        // Explode it by comma, in case they chose more than 1 role for this.
-        $setting = explode(',', $setting);
 
         // Make sure the roles are still valid and haven't been deleted from the system.
         $roles = array_filter($setting, function($id) use ($DB) {

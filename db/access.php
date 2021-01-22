@@ -70,6 +70,6 @@ $capabilities = array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => array()
-    )
+    ),
 
 );

@@ -1,0 +1,23 @@
+<table class="table table-bordered block_plp-table">
+    <thead class="thead-dark">
+    <tr>
+        <th></th>
+        {{#options.columns}}
+            <th scope="col">{{col_name}}</th>
+        {{/options.columns}}
+    </tr>
+    </thead>
+    <tbody>
+    {{#value.rows}}
+        <tr>
+            <th scope="col">{{row_name}}</th>
+            {{#cols}}
+                <td>
+                    {{#value}} {{#pix}} i/checked, core {{/pix}} {{/value}}
+                    {{^value}}-{{/value}}
+                </td>
+            {{/cols}}
+        </tr>
+    {{/value.rows}}
+    </tbody>
+</table>

@@ -46,6 +46,25 @@ require_once($CFG->dirroot . '/lib/formslib.php');
 class settings_form extends moodleform {
 
     /**
+     * Options to use in the filemanager for specific elements.
+     */
+    const FILEMANAGER_OPTIONS = [
+        'logo' => ['accepted_types' => 'image', 'subdirs' => 0, 'maxfiles' => 1]
+    ];
+
+    /**
+     * Itemids to use for specific elements.
+     */
+    const FILEMANAGER_ITEMS = [
+        'logo' => 0
+    ];
+
+    /**
+     * Filearea to use for any uploaded files in the PLP settings.
+     */
+    const FILEMANAGER_AREA = 'plugin_settings';
+
+    /**
      * Define the fields of the settings form.
      * @return void
      */
@@ -71,10 +90,10 @@ class settings_form extends moodleform {
         $this->_form->addElement('select', 'dock', get_string('settings:dock:info', 'block_plp'), $dockpositions);
 
         // Logo.
-        $this->_form->addElement('filepicker', 'logo', get_string('settings:logo:info', 'block_plp'), null,
-            ['accepted_types' => 'image']);
+        $this->_form->addElement('filemanager', 'logo_filemanager', get_string('settings:logo:info', 'block_plp'),
+            null, static::FILEMANAGER_OPTIONS['logo']);
 
-        // Course categories section.
+        // Course section.
         $this->_form->addElement('header', 'courses', get_string('courses'));
         $this->_form->setExpanded('courses', true);
 
@@ -91,6 +110,11 @@ class settings_form extends moodleform {
         $this->_form->addElement('select', 'categories', get_string('settings:categories:info', 'block_plp'), $categories)
             ->setMultiple(true);
         $this->_form->disabledIf( 'categories', 'category_usage', 'eq', 'no');
+
+        // Course display name.
+        $this->_form->addElement('text', 'course_display_format', get_string('settings:course:displayformat:info', 'block_plp'));
+        $this->_form->setType('course_display_format', PARAM_TEXT);
+        $this->_form->addHelpButton('course_display_format', 'settings:course:displayformat', 'block_plp');
 
         // General settings section.
         $this->_form->addElement('header', 'general', get_string('settings:general', 'block_plp'));
@@ -140,6 +164,7 @@ class settings_form extends moodleform {
         $this->_form->setDefault('logo', $plp->get_setting('logo'));
         $this->_form->setDefault('category_usage', $plp->get_setting('category_usage'));
         $this->_form->setDefault('categories', $plp->get_setting('categories'));
+        $this->_form->setDefault('course_display_format', $plp->get_setting('course_display_format'));
         $this->_form->setDefault('academic_year_enabled', $plp->get_setting('academic_year_enabled'));
         $this->_form->setDefault('academic_year', $plp->get_setting('academic_year'));
         $this->_form->setDefault('email_alerts_enabled', $plp->get_setting('email_alerts_enabled'));

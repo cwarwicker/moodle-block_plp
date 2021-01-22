@@ -32,6 +32,8 @@ $string['pluginname:my'] = 'My PLP';
 $string['error:class'] = 'Unable to locate class: {$a}. This is probably a coding problem and needs to be fixed by the developer.';
 $string['error:colour'] = 'Colour must be a valid hex code.';
 $string['error:form:required'] = 'Field ({$a}) is required.';
+$string['error:formfieldtype:invalid'] = 'Form field type is invalid ({$a})';
+$string['error:formfieldtype:missing'] = 'Form field type is missing';
 $string['error:invalidclassproperty'] = 'Property ({$a}) does not exist on this class.';
 $string['error:mis:connection'] = 'Unable to connect to external database.';
 $string['error:mis:type'] = 'Database type ({$a}) is not supported.';
@@ -39,6 +41,15 @@ $string['error:role:create'] = 'Something went wrong creating the {$a} role.';
 $string['error:templates:invalid'] = 'Invalid template file';
 $string['error:xml:content'] = 'To output as XML the content provided must be an array. (Found: {$a})';
 $string['error:unknown'] = 'Something went wrong. This is probably a coding problem and needs to be fixed by the developer.';
+
+// Exception error messages.
+$string['exception:code:missingmethod'] = 'Attempt to call ({$a->class}::{$a->method}) failed, as it either does not exist, or is uncallable.';
+$string['exception:data:db:missingconfig'] = 'DB section ({$a}) is missing either a query type, a display type, or an actual query.';
+$string['exception:data:chart:invalidtype'] = 'Invalid chart type.';
+$string['exception:data:db:mis:missing'] = 'MIS Connection specified is either missing or invalid';
+$string['exception:data:db:mis:disabled'] = 'MIS Connection specified is disabled';
+$string['exception:data:db:mis:connection'] = 'Failed to connect to external database';
+$string['exception:permission:reference'] = 'Unable to load object into permission check - invalid reference type.';
 
 // Capabilities.
 $string['plp:addinstance'] = 'Add an instance of the block';
@@ -63,6 +74,11 @@ $string['title:core:config:plugins:new'] = 'New Plugin';
 $string['bottom'] = 'Bottom';
 $string['build'] = 'Build';
 
+$string['confidentiality'] = 'Confidentiality';
+$string['confidentiality:personal'] = 'Personal';
+$string['confidentiality:private'] = 'Private';
+$string['confidentiality:public'] = 'Public';
+$string['confidentiality:restricted'] = 'Restricted';
 $string['config'] = 'Configuration';
 $string['configsaved'] = 'Configuration settings saved';
 $string['connections'] = 'Connections';
@@ -100,14 +116,19 @@ $string['mis:type:oci'] = 'Oracle';
 $string['mis:type:pgsql'] = 'PostgreSQL';
 $string['mis:type:sqlsrv'] = 'Microsoft SQL Server';
 
+$string['noresults'] = 'No results';
+
 $string['page'] = 'Page';
 $string['pages'] = 'Pages';
 $string['path'] = 'Path';
 $string['personaltutor'] = 'Personal Tutor';
 $string['personaltutor:role:desc'] = 'This role should be used for assigning Tutors directly to students. It should only assigned at the User context (i.e. you should not add this role to courses). This role should be given the capability block/plp:view.';
+$string['pleasechoose'] = 'Please choose...';
 $string['plpmanager'] = 'PLP Manager';
 $string['plpmanager:role:desc'] = 'This role should be used to define users with the permissions to see the PLP data of every student in the system. This role should be given the capability block/plp:view_any and all PLP Managers should be added to this role on the system context.';
 $string['plugin'] = 'Plugin';
+$string['plugin:add:page'] = 'Add Plugin Page';
+$string['plugin:add:section'] = 'Add Section to Plugin Page';
 $string['plugin:colour:background'] = 'Header Background Colour';
 $string['plugin:colour:font'] = 'Header Font Colour';
 $string['plugin:core'] = 'Core Plugin';
@@ -130,8 +151,11 @@ $string['notwriteable'] = 'Not Writeable';
 $string['overview'] = 'Overview';
 
 $string['permissions'] = 'Permissions';
+$string['print'] = 'Print';
 
 $string['recentactivity'] = 'Recent Activity';
+
+$string['setby'] = 'Set by';
 
 $string['settings'] = 'Settings';
 $string['settings:academicyear'] = '<strong>Academic Year</strong>';
@@ -145,6 +169,9 @@ $string['settings:categoryuse:info'] = $string['settings:categoryuse'] . '<br>By
 $string['settings:categoryuse:exc'] = 'Exclusion';
 $string['settings:categoryuse:inc'] = 'Inclusion';
 $string['settings:categoryuse:neither'] = 'Neither (Default)';
+$string['settings:course:displayformat'] = '<strong>Course Display Name Format</strong>';
+$string['settings:course:displayformat:info'] = $string['settings:course:displayformat'] . '<br>When course names are displayed, use this format.';
+$string['settings:course:displayformat_help'] = '<b>Placeholders:</b><br>{{full}} - Full name<br>{{short}} - Short name<br>{{idnumber}} - Course IDNumber';
 $string['settings:dock'] = '<strong>Dock Position</strong>';
 $string['settings:dock:info'] = $string['settings:dock'] . '<br>The Dock allows you to re-open plugins in their most recent saved state. Do you want this to be at the bottom of the PLP, or on the left?';
 $string['settings:general'] = 'General';

@@ -25,6 +25,8 @@
  */
 namespace block_plp\core\forms;
 
+use block_plp\models\confidentiality;
+use block_plp\models\plugin_section;
 use block_plp\traits\form_helper;
 use moodleform;
 
@@ -51,15 +53,17 @@ class plugin_form extends moodleform {
      */
     protected function definition() {
 
-        global $CFG;
+        global $PAGE;
+
+        $renderer = $PAGE->get_renderer('block_plp');
 
         // Hidden fields.
         $this->_form->addElement('hidden', 'id');
         $this->_form->setType('id', PARAM_INT);
 
         // General config.
-        $this->_form->addElement('header', 'general', get_string('general'));
-        $this->_form->setExpanded('general', true);
+        $this->_form->addElement('header', 'header_general', get_string('general'));
+        $this->_form->setExpanded('header_general', true);
 
         // Enabled/Disabled checkbox.
         $this->_form->addElement('advcheckbox', 'enabled', get_string('enabled', 'block_plp'),
@@ -78,24 +82,23 @@ class plugin_form extends moodleform {
         $this->_form->setType('font_colour', PARAM_TEXT);
 
         // Pages config - Each plugin can have multiple pages, which appear as tabs.
-        $this->_form->addElement('header', 'pages', get_string('pages', 'block_plp'));
-        $this->_form->setExpanded('pages', true);
+        $this->_form->addElement('header', 'header_pages', get_string('pages', 'block_plp'));
+        $this->_form->setExpanded('header_pages', true);
 
-        // TODO: Pages.
+        // Plugin pages - These are built up with custom javascript, and the data is simply stored in a hidden input.
+        $this->_form->addElement('hidden', 'pages');
+        $this->_form->setType('pages', PARAM_RAW);
+        $this->_form->addElement('html', $renderer->render_from_template('block_plp/core/config/plugin_pages', []));
 
         // Permissions config.
         $this->_form->addElement('header', 'permissions', get_string('permissions', 'block_plp'));
         $this->_form->setExpanded('permissions', true);
-
         // TODO: permissions.
 
         // Scheduled task config.
         $this->_form->addElement('header', 'tasks', get_string('tasks', 'block_plp'));
         $this->_form->setExpanded('tasks', true);
-
         // TODO: permissions.
-
-
 
         // Submit/Cancel buttons.
         $this->add_action_buttons();
@@ -107,6 +110,15 @@ class plugin_form extends moodleform {
         $this->_form->setDefault('title', $plugin->get('title'));
         $this->_form->setDefault('background_colour', $plugin->get_setting('background_colour'));
         $this->_form->setDefault('font_colour', $plugin->get_setting('font_colour'));
+
+        // Load any extra required javascript. This is an array within an array, so that it all gets passed through as one array.
+        $params = [[
+            'section_types' => plugin_section::get_types(),
+            'section_locations' => plugin_section::get_locations(),
+            'section_confidentiality' => confidentiality::get_levels()
+        ]];
+
+        $PAGE->requires->js_call_amd('block_plp/core_plugin_pages', 'init', $params);
 
     }
 

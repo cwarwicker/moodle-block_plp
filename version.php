@@ -32,3 +32,8 @@ $plugin->requires = 2020102300;
 $plugin->component = 'block_plp';
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = [];
+
+// These PHP extensions are required for the plugin to function fully.
+$plugin->requiredextensions = [
+    'php-gd'
+];

@@ -26,6 +26,7 @@
 
 namespace block_plp\traits;
 
+use block_plp\model;
 use coding_exception;
 use stdClass;
 
@@ -58,7 +59,7 @@ trait orm {
         global $DB;
 
         if (!is_null($id)) {
-            $record = $DB->get_record(static::$table, ['id' => $id]);
+            $record = $DB->get_record(static::TABLE, ['id' => $id]);
             if ($record) {
                 $this->map_orm($record);
             }
@@ -76,17 +77,29 @@ trait orm {
 
     /**
      * Map values from a database record onto the class properties.
-     * @param stdClass $record
+     * @param stdClass|array $record
      * @return void
      */
-    protected function map_orm(stdClass $record) {
+    public function map_orm($record) : void {
 
-        $record = (array)$record;
+        if (is_object($record)) {
+            $record = (array)$record;
+        }
 
         foreach ($record as $key => $value) {
+
             if (property_exists($this, $key)) {
-                $this->$key = $value;
+
+                // Is there a method to overwrite this simple property set?
+                $method = 'map_' . $key;
+                if (method_exists($this, $method)) {
+                    $this->$method($value);
+                } else {
+                    $this->$key = $value;
+                }
+
             }
+
         }
 
     }
@@ -138,11 +151,12 @@ trait orm {
 
         // If it already exists, we can update it using the dbkeys.
         if ($this->exists()) {
-            return $DB->update_record(static::$table, $obj);
+            // If the update is successful, return the object id, otherwise false.
+            return ($DB->update_record(static::TABLE, $obj)) ? $this->id : false;
         } else {
             // If it's new, we will need to pass the values through into this method.
             unset($obj->id);
-            $this->id = $DB->insert_record(static::$table, $obj);
+            $this->id = $DB->insert_record(static::TABLE, $obj);
             return $this->id;
         }
 
@@ -152,10 +166,10 @@ trait orm {
      * Delete this record from the database.
      * @return bool
      */
-    public function delete() {
+    public function delete() : bool {
 
         global $DB;
-        return $DB->delete_records(static::$table, ['id' => $this->get('id')]);
+        return $DB->delete_records(static::TABLE, ['id' => $this->get('id')]);
 
     }
 
@@ -178,9 +192,9 @@ trait orm {
     /**
      * Helper static function to return an instance of an object.
      * @param int|null $id
-     * @return mixed Returns an new instance of the class this is called on.
+     * @return model|null Returns an new instance of the class this is called on, or null.
      */
-    public static function load(int $id = null) {
+    public static function load(int $id = null) : ?model {
         $class = get_called_class();
         return new $class($id);
     }
@@ -190,12 +204,12 @@ trait orm {
      * @param array $filters Conditions to be passed into the get_record() method.
      * @return model|null Either the object instance, or null if not found.
      */
-    public static function find(array $filters) {
+    public static function find(array $filters) : ?model {
 
         global $DB;
 
         $class = get_called_class();
-        $record = $DB->get_record(static::$table, $filters, 'id');
+        $record = $DB->get_record(static::TABLE, $filters, 'id');
         if ($record) {
             $obj = new $class($record->id);
             if ($obj->exists()) {
@@ -218,17 +232,59 @@ trait orm {
 
         $class = get_called_class();
         $return = [];
-        $records = $DB->get_records(static::$table, $filters, '', 'id');
+        $records = $DB->get_records(static::TABLE, $filters, '', 'id');
         if ($records) {
             foreach ($records as $record) {
-                $obj = new $class($record->id);
-                if ($obj->exists()) {
+                $obj = $class::load($record->id);
+                if ($obj && $obj->exists()) {
                     $return[$record->id] = $obj;
                 }
             }
         }
 
         return $return;
+
+    }
+
+    /**
+     * Get a specific field from a database record of this type.
+     * @param int $id
+     * @param string $field
+     * @return string|null
+     */
+    public static function field(int $id, string $field) : ?string {
+
+        global $DB;
+        $field = $DB->get_field(static::TABLE, $field, ['id' => $id]);
+        return ($field) ? $field : null;
+
+    }
+
+    /**
+     * Given an array of data, load an object of this instance, passing that data in.
+     * @param array $data Array of data to map onto the new object.
+     * @param string|null $class (Optional) Class to use to load objects. If left null, will use calling class.
+     * @return model
+     */
+    public static function from_array(array $data, string $class = null) : model {
+
+        // If we did not specify the class in the method call, use the current model's class.
+        $class = ($class) ?? get_called_class();
+
+        // If we passed through an id, load the database record. Otherwise set it to null.
+        $id = null;
+        if (isset($data['id'])) {
+            $id = $data['id'];
+            unset($data['id']);
+        }
+
+        // Load the new instance of this object.
+        $object = new $class($id);
+
+        // Now map the rest of the data to the object.
+        $object->map_orm($data);
+
+        return $object;
 
     }
 

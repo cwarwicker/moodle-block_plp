@@ -1,0 +1,57 @@
+<table class="table">
+    <thead>
+        <tr>
+
+            {{#show_delete_header}}
+                <th></th>
+            {{/show_delete_header}}
+
+            {{#show_edit_header}}
+                <th></th>
+                <th></th>
+            {{/show_edit_header}}
+
+            {{#headers}}
+                <th>{{title}}</th>
+            {{/headers}}
+
+        </tr>
+    </thead>
+    <tbody>
+        {{#items}}
+            <tr>
+
+                {{#can_delete}}
+                    <td>
+                        <a href="#" class="">{{#pix}}t/delete, core, {{#str}}delete, core{{/str}}{{/pix}}</a>
+                    </td>
+                {{/can_delete}}
+
+                {{#can_edit}}
+                    <td>
+                        <a href="#" class="block_plp-toggle-edit block_plp-section-{{sectionid}}-item-{{id}}-edit"
+                           data-id="{{sectionid}}-item-{{id}}">{{#pix}}t/editstring, core, {{#str}}edit, core{{/str}}{{/pix}}</a>
+                        <a href="#" class="block_plp-toggle-edit block_plp-section-{{sectionid}}-item-{{id}}-view" style="display:none;"
+                           data-id="{{sectionid}}-item-{{id}}">{{#pix}}e/cancel, core, {{#str}}cancel, core{{/str}}{{/pix}}</a>
+                    </td>
+                    <td>
+                        <a href="#" class="block_plp-section-{{sectionid}}-item-{{id}}-view block_plp-save" style="display:none;"
+                           data-id="{{sectionid}}-item-{{id}}">{{#pix}}e/save, core, {{#str}}save, core{{/str}}{{/pix}}</a>
+                    </td>
+                {{/can_edit}}
+
+                {{#fields}}
+                    <td>
+                        <div class="block_plp-section-{{sectionid}}-item-{{id}}-view">
+                            {{{value}}}
+                        </div>
+                        <div class="block_plp-edit block_plp-section-{{sectionid}}-item-{{id}}-edit">
+                            {{{edit}}}
+                        </div>
+                    </td>
+                {{/fields}}
+
+            </tr>
+        {{/items}}
+    </tbody>
+</table>

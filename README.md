@@ -1,1 +1,3 @@
 # moodle-block_plp
+
+THIS PLUGIN IS UNDER DEVELOPMENT - DO NOT USE

@@ -1,0 +1,89 @@
+- Change old usages of moodle coding_exception to plp one.
+- Why do I have value and valueuntouched when getting the editing display, when i have another method for specifically getting the
+non-editing display value?
+
+
+
+
+
+
+
+
+
+
+So the permissions will be stored against the plugin, using 'plp roles':
+
+E.g. Targets Plugin, something like:
+-               |     add     |     edit_own    |       edit_any    |   delete_own  |   delete_any  |    etc..   |
+User            |       N     |     Y           |   N               |    Y          |       N
+Teacher         |       Y     |     Y           |   Y               |    Y          |       Y
+Personal Tutor  |       Y     |     Y           |   Y               |    Y          |       Y
+PLP Manager     |       N     |     Y           |   Y               |    Y          |       Y
+
+This 'plp role(s)' are assigned to a variable on the user class, when it queries for permissions on the user's plp.
+
+Examples:
+
+Current User: Teacher A (teacher)
+Student: Student A
+
+-----------------
+
+OPTION ONE - Permissions tied to PLP roles (e.g. user, teacher, tutor, manager)
+==============================
+
+Check if Student A can edit a section on their own PLP:
+- if ($user->has_plugin_permission('edit_own', $section, $section->get_user()) || ...
+- Then calls $user->get_permission_roles() to return the PLP roles loaded in the permission contexts
+- This should return 'user' as they are a 'user' on their own PLP
+- Some roles are returned to move onto $plugin->can_user_edit_own($user, $roles)
+- Then check permissions in DB
+
+Check if Teacher A can edit a section on Student A's PLP:
+- if (... || $user->has_plugin_permission('edit_any', $section, $section->get_user())
+- This calls $user->get_permission_roles() to retunr the PLP roles loaded from user object
+- This should return 'teacher' as they have access to the student via a course context
+- ..
+
+Check if Teacher A can add a new item to the plugin section on Student A's PLP:
+- if ($user->has_plugin_permission('add', $plugin->get_user())) {}
+- It then calls $user->get_permission_roles() - which will be loaded when the permission contexts are also loaded
+- Now we have the user associated with the PLP and we know which roles Teacher A is for them
+- Now we can check the plugin permissions to see if Teacher is true for 'add'
+
+Check if Teacher A can edit an item on Student A's PLP, created by Teacher A
+- First is the check to make sure Teacher A can view Student A's PLP.
+- Then: if ($user->has_plugin_permission('edit_own', $item, $item->get_createdby_user() || ... )
+- Using the user in param 3, get the user's plp roles. In this case it should be 'user/student' as it is them.
+- There are _some_ roles returned, so move onto the next stage and that is call $plugin->can_user_edit_own($user, $roles)
+- This checks if the role 'user/student' is present.
+
+Check if Teacher A can edit an item on Student A's PLP, created by Tutor B
+- First is the check to make sure Teacher A can view Student A's PLP.
+- Then: if (... || $user->has_plugin_permission('edit_any', $item, $item->get_user())
+- This has Student A as the user being passed through, rather than the person who created it.
+- It gets Teacher A's plp roles on Student A, which returns ['teacher'].
+- There are _some_ roles returned, so move on and call $plugin->can_user_edit_any($user, $roles)
+- This checks the value of the permission stored against the plugin for 'edit_any', to see if 'teacher' is true.
+
+Check if Student A can delete an item on their PLP, created by Teacher A
+- First the check to see if they can see the PLP
+- Then: if($user->has_plugin_permission('delete_own', $item, $item->get_createdby_user() || ...)
+- Here the createdby user object will be Teacher A
+- Checks Student A's plp roles on Teacher A
+- This should return NO roles
+- So it moves to the next if check
+- if (... || $user->has_plugin_permission('delete_any', $item, $item->get_user())
+- Here the param 3 user is Student A
+- It gets all of Student A's plp roles on Student A
+- This should return ['user'] so it moves onto the next check $plugin->can_user_delete_any($user, $roles)
+- Then it checks if the plugin has 'delete_any' enabled for 'user', which is does not.
+- Returns false.
+
+Check if Student A can delete an item on their PLP, created by them.
+- First the check to see if they can see the PLP
+- Then: if($user->has_plugin_permission('edit_own', $item, $item->get_createdby_user() || ...)
+- here the createdby user will be Student A
+- Check PLP roles on Student A, should return ['user']
+- $plugin->can_user_edit_own($roles)
+- Check if the plugin has edit_own enabled for 'user' role.

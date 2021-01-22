@@ -1,0 +1,9 @@
+{{#results}}
+    <div class="block_plp-section_db_single">
+        <label for="{{name}}" class="block_plp-field-label">{{name}}</label>
+        <div>{{value}}</div>
+    </div>
+{{/results}}
+{{^results}}
+    <p>{{#str}}noresults, block_plp{{/str}}</p>
+{{/results}}

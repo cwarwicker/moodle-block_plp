@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/plp/db" VERSION="20201126" COMMENT="XMLDB file for Moodle blocks/plp"
+<XMLDB PATH="blocks/plp/db" VERSION="20210512" COMMENT="XMLDB file for Moodle blocks/plp"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -12,10 +12,38 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="block_plp_settings" COMMENT="Settings table">
+    <TABLE NAME="block_plp_settings" COMMENT="Settings table for block settings">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="setting" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="set" UNIQUE="false" FIELDS="setting"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_plugin_settings" COMMENT="Settings table for plugin settings">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pluginid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="setting" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pid_fk" TYPE="foreign" FIELDS="pluginid" REFTABLE="block_plp_plugins" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pidset" UNIQUE="false" FIELDS="pluginid, setting"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_user_settings" COMMENT="Settings table for user settings in the block">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="pluginid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="setting" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -23,11 +51,26 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="uid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="pid_fk" TYPE="foreign" FIELDS="pluginid" REFTABLE="plp_plugins" REFFIELDS="id"/>
+        <KEY NAME="pid_fk" TYPE="foreign" FIELDS="pluginid" REFTABLE="block_plp_plugins" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="pidset" UNIQUE="false" FIELDS="pluginid, setting"/>
-        <INDEX NAME="upset" UNIQUE="false" FIELDS="userid, pluginid, setting"/>
+        <INDEX NAME="uidset" UNIQUE="false" FIELDS="userid, setting"/>
+        <INDEX NAME="uidpidset" UNIQUE="false" FIELDS="userid, pluginid, setting"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_section_settings" COMMENT="Settings table for plugin section settings">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sectionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="setting" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="sid_fk" TYPE="foreign" FIELDS="sectionid" REFTABLE="block_plp_plugin_sections" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="sidset" UNIQUE="false" FIELDS="sectionid, setting"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_plp_mis_connections" COMMENT="External database connections to MIS systems">
@@ -52,7 +95,7 @@
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="path" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="version" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="custom" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="custom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -72,10 +115,110 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pid_fk" TYPE="foreign" FIELDS="pluginid" REFTABLE="block_plp_plugins" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="pluginenabled" UNIQUE="false" FIELDS="pluginid, enabled"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_plugin_sections" COMMENT="Sections within plugin pages">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="location" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="ordernum" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="confidentiality" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pid_fk" TYPE="foreign" FIELDS="pageid" REFTABLE="block_plp_plugin_pages" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pageenabled" UNIQUE="false" FIELDS="pageid, enabled"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_plugin_fields" COMMENT="Form fields attached to plugin sections">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sectionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="options" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="defaultvalue" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="placeholder" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="validation" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="instructions" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="sid_fk" TYPE="foreign" FIELDS="sectionid" REFTABLE="block_plp_plugin_sections" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="block_plp_plugin_field_data" COMMENT="User data for plugin fields">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="fieldid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="data" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fid_fk" TYPE="foreign" FIELDS="fieldid" REFTABLE="block_plp_plugin_fields" REFFIELDS="id"/>
+        <KEY NAME="uid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="iid_fk" TYPE="foreign" FIELDS="itemid" REFTABLE="block_plp_plugin_items" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="fielduser" UNIQUE="false" FIELDS="fieldid, userid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_plugin_items" COMMENT="Separate items for plugins which can have multiple instances of its form saved">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sectionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="setbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="settime" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="uid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="sid_fk" TYPE="foreign" FIELDS="sectionid" REFTABLE="block_plp_plugin_sections" REFFIELDS="id"/>
+        <KEY NAME="sbuid_fk" TYPE="foreign" FIELDS="setbyuserid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="block_plp_confidentiality" COMMENT="This table stores the confidentiality settings for things">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="context" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="level" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="contextitem" UNIQUE="false" FIELDS="context, itemid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_plp_permissions"
+           COMMENT="This table stores what PLP roles are allowed which permissions, for a certain contexts, e.g. Plugin, Plugin Item, Form Field">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="ref" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="refid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"
+               COMMENT="The ID of the field from the referenced context. E.g. a pluginid, itemid or fieldid."/>
+        <FIELD NAME="role" TYPE="char" LENGTH="25" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the 'PLP role', for example: 'user', 'teacher', 'tutor', 'manager'."/>
+        <FIELD NAME="permission" TYPE="char" LENGTH="25" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the permission"/>
+        <FIELD NAME="value" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>

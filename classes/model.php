@@ -44,9 +44,9 @@ abstract class model {
 
     /**
      * Name of the database table this object is loaded from.
-     * @var string
+     * Please overwrite this in the model classes.
      */
-    protected static $table = '';
+    const TABLE = '';
 
     /**
      * Construct the model and try to load it from the database.
@@ -66,8 +66,8 @@ abstract class model {
      * Run any extra actions the model needs after construction, like loading more specific data.
      * @return void
      */
-    protected function post_load_actions() {
-        return;
+    protected function post_load_actions() : void {
+        // To be overridden by sub classes.
     }
 
 }

@@ -1,0 +1,8 @@
+<select class="form-control" id="{{elementid}}" name="{{elementname}}{{#options.multi}}[]{{/options.multi}}" {{#options.multi}}multiple="true"{{/options.multi}}>
+    {{^options.multi}}
+    <option selected="true" value="">{{#str}} pleasechoose, block_plp {{/str}}</option>
+    {{/options.multi}}
+    {{#options.options}}
+        <option value="{{value}}" {{#selected}}selected="true"{{/selected}} >{{name}}</option>
+    {{/options.options}}
+</select>
